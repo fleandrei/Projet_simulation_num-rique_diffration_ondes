@@ -121,15 +121,11 @@ end
 
 # Affichage graphique
 
-xx = range(0,stop=2*pi,length=1000)
-yy = sin.(3*xx + 4*cos.(2*xx))
-plot(xx, yy, color="red", linewidth=2.0, linestyle="--")
+#figimage(M)
+imshow(M, extent=(-3, 3, -3, 3))
 savefig("res.svg")
 
 
-#p = spy(M)
-#img = SVG("../output.svg", 8inch, 8inch)
-#draw(img, p)
 
 
 
