@@ -69,7 +69,7 @@ end
 
 
 # Calcule l'onde diffractée complexe U
-function calculU(r,teta, Cm, Np)
+function calculUp(r,teta, Cm, Np)
 	#N=length(Cm)
 	U=0.0
 	for m=1:2*Np + 1
@@ -90,6 +90,12 @@ function calculUinc(r,teta, Dm, Np)
 
 	return U
 end
+
+
+function calculRCS(U)
+	return 10*log10(2*pi*abs(U)^2)
+end
+
 
 
 
@@ -126,7 +132,7 @@ for i = 1:taille_matrice
 			#println(" r=",r)
 			M[i,j]=0
 		else
-			M[i,j]=real(calculU(r,lambda, Cm, Np))
+			M[i,j]=real(calculUp(r,lambda, Cm, Np))
 			#println(" autre=",r)
 		end
 	end
