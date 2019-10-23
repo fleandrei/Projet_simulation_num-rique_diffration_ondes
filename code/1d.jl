@@ -1,5 +1,5 @@
 using Printf
-using Gadfly
+using PyPlot
 using SpecialFunctions
 
 ########### VARIABLE #############
@@ -120,9 +120,16 @@ for i = 1:taille_matrice
 end
 
 # Affichage graphique
-p = spy(M)
-img = SVG("../output.svg", 8inch, 8inch)
-draw(img, p)
+
+xx = range(0,stop=2*pi,length=1000)
+yy = sin.(3*xx + 4*cos.(2*xx))
+plot(xx, yy, color="red", linewidth=2.0, linestyle="--")
+savefig("res.svg")
+
+
+#p = spy(M)
+#img = SVG("../output.svg", 8inch, 8inch)
+#draw(img, p)
 
 
 
