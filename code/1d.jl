@@ -1,6 +1,7 @@
 using Printf
 using PyPlot
 using SpecialFunctions
+using LinearAlgebra 
 
 include("./polar.jl")
 include("./diffraction.jl")
@@ -11,7 +12,6 @@ include("./diffraction.jl")
 k = 2*pi
 lambda = 2*pi/k # longueur d'onde
 h = lambda/60  #pas de la grille
-alpha = pi # angle de l'onde incidente
 a = 1 # rayon de l'obstacle
 taille_espace=6 # taille total de la grille
 taille_matrice=convert(Int64, taille_espace*1/h)
@@ -20,7 +20,6 @@ taille_matrice=convert(Int64, taille_espace*1/h)
 alpha=pi #Angle de l'onde incidente
 alphap=0 #Angle de l'obstacle
 bp=0
-a=1
 rp=1
 e=10^(-12)
 Np= floor(Int64,k*a + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*a)^(1/3) +1)
@@ -103,16 +102,11 @@ Np= floor(Int64,k*a + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*a)^(1/3
 
 
 
-
-
-########### CODE #############
-
-
+function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie, Dm: Coef Fourrier onde incidente, Hm: vecteur Besselh
 Cm=ones(Complex{Float32},2*Np+1,1)
 Dm=ones(Complex{Float32},2*Np+1,1)
 Hm=ones(Complex{Float32},2*Np+1,1)
 temp=exp(im*k*cos(alpha-alphap)*bp)
-u=0.0
 
 for m=1:2*Np+1
 	Dm[m]=temp*exp(im*(pi*0.5 - alpha)*m -Np)
@@ -121,7 +115,60 @@ for m=1:2*Np+1
 
 end
 
+return (Cm,Dm,Hm)
+end
 
+
+function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
+Dm=ones(Complex{Float32},2*Np+1,1)
+temp=exp(im*k*cos(alpha-alphap)*bp)
+for m=1:2*Np+1
+	Dm[m]=temp*exp(im*(pi*0.5 - alpha)*m -Np)
+end
+
+return Dm
+end
+
+
+function BesselHVector(Np,a,k)
+Hm=ones(Complex{Float32},2*Np+1,1)
+temp=a*k
+for m=1:2*Np+1
+	Hm[m]=besselh(m-Np,temp)
+end
+
+return Hm
+end
+
+
+function Calcule_b(bp,alphap,alpha,Np, k, a) 
+Dm=CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
+b=ones(Complex{Float32},2*Np+1,1)
+temp=a*k
+for m=1:2*Np+1
+	b[m]=besselj(m-Np, temp)*Dm[m]
+end
+return b
+end
+
+
+function CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
+Cm=ones(Complex{Float32},2*Np+1,1)
+b=Calcule_b(bp,alphap,alpha,Np, k, a)
+Hm=BesselHVector(Np,a,k)
+#A=zeros(Complex{Float32},2*Np+1, 2*Np+1)
+A=Matrix(I,2*Np+1, 2*Np+1)
+A=A.*Hm
+Cm=A\b
+
+return Cm
+end
+########### CODE #############
+
+
+#Cm,Dm,Hm=CDH(bp,alphap,alpha,Np,k)
+Cm=CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
+Dm=CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
 
 # declaration de la matrice
 M = ones(Float64,taille_matrice, taille_matrice)
@@ -137,7 +184,7 @@ for i = 1:taille_matrice
 			#println(" r=",r)
 			M[i,j]=0
 		else
-			M[i,j]=real(calculUp(r,lambda, Cm, Np))
+			M[i,j]=abs(calculUp(r,lambda, Cm, Np)+calculUinc(r,lambda, Dm, Np))
 			#println(" autre=",r)
 		end
 	end
