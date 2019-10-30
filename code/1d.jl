@@ -2,6 +2,11 @@ using Printf
 using PyPlot
 using SpecialFunctions
 
+include("./polar.jl")
+include("./diffraction.jl")
+#using Polar
+#import Polar
+
 ########### VARIABLE #############
 k = 2*pi
 lambda = 2*pi/k # longueur d'onde
@@ -24,77 +29,77 @@ Np= floor(Int64,k*a + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*a)^(1/3
 ########## FONCTION ##############
 
 # a partir de l'indice d'une matrice donne les coordonnées cartésiennes
-function coordonnees(i,j,h,taille_espace) 
-	x=i*h-taille_espace/2
-	y=-j*h+taille_espace/2
-	return(x,y)
-end
+# function coordonnees(i,j,h,taille_espace) 
+# 	x=i*h-taille_espace/2
+# 	y=-j*h+taille_espace/2
+# 	return(x,y)
+# end
 
-# convertit les cartésiennes en polaires
-function conversion_polaire(x,y)
-	r=sqrt(x*x+y*y)
-	if (x > 0 && y >= 0)
-		lambda = atan(y/x)
+# # convertit les cartésiennes en polaires
+# function conversion_polaire(x,y)
+# 	r=sqrt(x*x+y*y)
+# 	if (x > 0 && y >= 0)
+# 		lambda = atan(y/x)
 
-	elseif(x > 0 && y < 0)
-		lambda = atan(y/x) + 2*pi
+# 	elseif(x > 0 && y < 0)
+# 		lambda = atan(y/x) + 2*pi
 
-	elseif(x < 0)
-		lambda = atan(y/x) + pi
+# 	elseif(x < 0)
+# 		lambda = atan(y/x) + pi
 
-	elseif(x == 0 && y > 0)
-		lambda = pi/2
+# 	elseif(x == 0 && y > 0)
+# 		lambda = pi/2
 
-	else
-		lambda = 3*pi /2
+# 	else
+# 		lambda = 3*pi /2
 	    
-	end
+# 	end
 
-	return(r,lambda)
-end
+# 	return(r,lambda)
+# end
 
-# convertit les polaires en cartésiennes
-function conversion_cart(r,lambda)
-	x=r*cos(lambda)
-	y=r*sin(lambda)
-	return(x,y)
-end
+# # convertit les polaires en cartésiennes
+# function conversion_cart(r,lambda)
+# 	x=r*cos(lambda)
+# 	y=r*sin(lambda)
+# 	return(x,y)
+# end
 
-# convertit les cartésiens en coordonnées matricielles
-function coordonnees_from_cart(x,y,h,taille_espace)
-	i=convert(Int64,(x+taille_espace/2)/h)
-	j=convert(Int64,-(y-taille-espace/2)/h)
-	return(i,j)
-end
-
-
-# Calcule l'onde diffractée complexe U
-function calculUp(r,teta, Cm, Np)
-	#N=length(Cm)
-	U=0.0
-	for m=1:2*Np + 1
-		U= U + Cm[m]*besselh(m-Np,k*r)*exp(im*(m-Np)*teta)
-	end	
-
-	return U
-end
+# # convertit les cartésiens en coordonnées matricielles
+# function coordonnees_from_cart(x,y,h,taille_espace)
+# 	i=convert(Int64,(x+taille_espace/2)/h)
+# 	j=convert(Int64,-(y-taille-espace/2)/h)
+# 	return(i,j)
+# end
 
 
-# Calcule l'onde incidente complexe U
-function calculUinc(r,teta, Dm, Np)
-	#N=length(Cm)
-	U=0.0
-	for m=1:2*Np + 1
-		U= U + Dm[m]*besselj(m-Np,k*r)*exp(im*(m-Np)*teta)
-	end	
+# # Calcule l'onde diffractée complexe U
+# function calculUp(r,teta, Cm, Np)
+# 	#N=length(Cm)
+# 	U=0.0
+# 	for m=1:2*Np + 1
+# 		U= U + Cm[m]*besselh(m-Np,k*r)*exp(im*(m-Np)*teta)
+# 	end	
 
-	return U
-end
+# 	return U
+# end
 
 
-function calculRCS(U)
-	return 10*log10(2*pi*abs(U)^2)
-end
+# # Calcule l'onde incidente complexe U
+# function calculUinc(r,teta, Dm, Np)
+# 	#N=length(Cm)
+# 	U=0.0
+# 	for m=1:2*Np + 1
+# 		U= U + Dm[m]*besselj(m-Np,k*r)*exp(im*(m-Np)*teta)
+# 	end	
+
+# 	return U
+# end
+
+
+# function calculRCS(U)
+# 	return 10*log10(2*pi*abs(U)^2)
+# end
 
 
 
