@@ -102,67 +102,67 @@ Np= floor(Int64,k*a + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*a)^(1/3
 
 
 
-function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie, Dm: Coef Fourrier onde incidente, Hm: vecteur Besselh
-Cm=ones(Complex{Float32},2*Np+1,1)
-Dm=ones(Complex{Float32},2*Np+1,1)
-Hm=ones(Complex{Float32},2*Np+1,1)
-temp=exp(im*k*cos(alpha-alphap)*bp)
+# function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie, Dm: Coef Fourrier onde incidente, Hm: vecteur Besselh
+# Cm=ones(Complex{Float32},2*Np+1,1)
+# Dm=ones(Complex{Float32},2*Np+1,1)
+# Hm=ones(Complex{Float32},2*Np+1,1)
+# temp=exp(im*k*cos(alpha-alphap)*bp)
 
-for m=1:2*Np+1
-	Dm[m]=temp*exp(im*(pi*0.5 - alpha)*m -Np)
-	Hm[m]=besselh(m-Np,a*k)
-	Cm[m]=besselj(m-Np,a*k) * Hm[m]^(-1) * Dm[m]
+# for m=1:2*Np+1
+# 	Dm[m]=temp*exp(im*(pi*0.5 - alpha)*m -Np)
+# 	Hm[m]=besselh(m-Np,a*k)
+# 	Cm[m]=besselj(m-Np,a*k) * Hm[m]^(-1) * Dm[m]
 
-end
+# end
 
-return (Cm,Dm,Hm)
-end
-
-
-function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
-Dm=ones(Complex{Float32},2*Np+1,1)
-temp=exp(im*k*cos(alpha-alphap)*bp)
-for m=1:2*Np+1
-	Dm[m]=temp*exp(im*(pi*0.5 - alpha)*m -Np)
-end
-
-return Dm
-end
+# return (Cm,Dm,Hm)
+# end
 
 
-function BesselHVector(Np,a,k)
-Hm=ones(Complex{Float32},2*Np+1,1)
-temp=a*k
-for m=1:2*Np+1
-	Hm[m]=besselh(m-Np,temp)
-end
+# function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
+# Dm=ones(Complex{Float32},2*Np+1,1)
+# temp=exp(im*k*cos(alpha-alphap)*bp)
+# for m=1:2*Np+1
+# 	Dm[m]=temp*exp(im*(pi*0.5 - alpha)*m -Np)
+# end
 
-return Hm
-end
-
-
-function Calcule_b(bp,alphap,alpha,Np, k, a) 
-Dm=CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
-b=ones(Complex{Float32},2*Np+1,1)
-temp=a*k
-for m=1:2*Np+1
-	b[m]=besselj(m-Np, temp)*Dm[m]
-end
-return b
-end
+# return Dm
+# end
 
 
-function CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
-Cm=ones(Complex{Float32},2*Np+1,1)
-b=Calcule_b(bp,alphap,alpha,Np, k, a)
-Hm=BesselHVector(Np,a,k)
-#A=zeros(Complex{Float32},2*Np+1, 2*Np+1)
-A=Matrix(I,2*Np+1, 2*Np+1)
-A=A.*Hm
-Cm=A\b
+# function BesselHVector(Np,a,k)
+# Hm=ones(Complex{Float32},2*Np+1,1)
+# temp=a*k
+# for m=1:2*Np+1
+# 	Hm[m]=besselh(m-Np,temp)
+# end
 
-return Cm
-end
+# return Hm
+# end
+
+
+# function Calcule_b(bp,alphap,alpha,Np, k, a) 
+# Dm=CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
+# b=ones(Complex{Float32},2*Np+1,1)
+# temp=a*k
+# for m=1:2*Np+1
+# 	b[m]=besselj(m-Np, temp)*Dm[m]
+# end
+# return b
+# end
+
+
+# function CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
+# Cm=ones(Complex{Float32},2*Np+1,1)
+# b=Calcule_b(bp,alphap,alpha,Np, k, a)
+# Hm=BesselHVector(Np,a,k)
+# #A=zeros(Complex{Float32},2*Np+1, 2*Np+1)
+# A=Matrix(I,2*Np+1, 2*Np+1)
+# A=A.*Hm
+# Cm=A\b
+
+# return Cm
+# end
 ########### CODE #############
 
 
