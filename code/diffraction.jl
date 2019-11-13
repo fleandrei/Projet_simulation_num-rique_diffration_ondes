@@ -30,9 +30,9 @@ end
 
 
 function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie, Dm: Coef Fourrier onde incidente, Hm: vecteur Besselh
-	Cm   = ones(Complex{Float32}, 2*Np + 1, 1)
-	Dm   = ones(Complex{Float32}, 2*Np + 1, 1)
-	Hm   = ones(Complex{Float32}, 2*Np + 1, 1)
+	Cm   = zeros(Complex{Float32}, 2*Np + 1, 1)
+	Dm   = zeros(Complex{Float32}, 2*Np + 1, 1)
+	Hm   = zeros(Complex{Float32}, 2*Np + 1, 1)
 	temp = exp(im*k * cos(alpha-alphap) * bp)
 
 	for m = -Np:Np
@@ -47,7 +47,7 @@ end
 
 
 function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
-	Dm   = ones(Complex{Float32}, 2*Np +1, 1)
+	Dm   = zeros(Complex{Float32}, 2*Np +1, 1)
 	temp = exp(im*k * cos(alpha-alphap) * bp)
 
 	for m = -Np:Np
@@ -61,7 +61,7 @@ end
 
 function BesselHVector(Np,a,k)
 
-	Hm   = ones(Complex{Float32},2*Np+1,1)
+	Hm   = zeros(Complex{Float32},2*Np+1,1)
 	temp = a * k
 
 	for m = -Np:Np
@@ -76,7 +76,7 @@ end
 function Calcule_b(bp,alphap,alpha,Np, k, a) 
 
 	Dm   = CoeFourrier_OndeInc(bp, alphap, alpha, Np, k)
-	b    = ones(Complex{Float32}, 2*Np + 1, 1)
+	b    = zeros(Complex{Float32}, 2*Np + 1, 1)
 	temp = a * k
 
 	for m = -Np:Np
@@ -90,7 +90,7 @@ end
 
 function CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
 
-	Cm = ones(Complex{Float32},2*Np+1,1)
+	Cm = zeros(Complex{Float32},2*Np+1,1)
 	b  = Calcule_b(bp, alphap, alpha, Np, k, a)
 	Hm = BesselHVector(Np, a, k)
 	#A=zeros(Complex{Float32},2*Np+1, 2*Np+1)
