@@ -49,6 +49,11 @@ function distance(x1,y1,x2,y2)
 	return(d)
 end
 
+function angle(x1,y1,x2,y2)
+	alpha=tan(abs(y2-y1)/abs(x2-x1))
+	return(alpha)
+end
+
 	#export coordonnees
 
 #end
