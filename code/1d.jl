@@ -171,7 +171,7 @@ Cm=CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
 Dm=CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
 
 # declaration de la matrice
-M = ones(Float64,taille_matrice, taille_matrice)
+M = zeros(Float64,taille_matrice, taille_matrice)
 
 
 # Parcoure et remplissage de la matrice
@@ -180,10 +180,7 @@ for i = 1:taille_matrice
 		x,y=coordonnees(i,j,h,taille_espace)
 		r,lambda=conversion_polaire(x,y)
 		#println("x=",x,"  y=",y,"  r=",r)
-		if r < a
-			#println(" r=",r)
-			M[i,j]=0
-		else
+		if r >= a
 			M[i,j]=abs(calculUp(r,lambda, Cm, Np)+calculUinc(r,lambda, Dm, Np))
 			#println(" autre=",r)
 		end
