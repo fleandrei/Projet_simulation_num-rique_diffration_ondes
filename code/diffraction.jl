@@ -88,7 +88,8 @@ function Calcule_b(bp,alphap,alpha,Np, k, a)
 end
 
 
-function CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
+
+function CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a)
 
 	Cm = ones(Complex{Float32},2*Np+1,1)
 	b  = Calcule_b(bp, alphap, alpha, Np, k, a)
@@ -99,4 +100,91 @@ function CoeFourrier_OndeRefracte(bp,alphap,alpha,Np, k, a)
 	Cm = A\b
 
 	return Cm
+end
+
+function Phi(m,rp, teta,k)
+	return besselh(m, k*rp)*exp(im*m*teta)
+end
+
+function Phi_Chap(m,rp,teta,k)
+	return besselj(m, rp*k)*exp(im*m*teta)
+end
+
+function Smn(m,n,b,teta, k)
+	return Phi(m-n,b, teta,k)
+end
+
+
+
+function dmp(p, Obstacle, Beta, Np,k)
+	Dm = ones(Complex{Float32}, 2*Np +1, 1)
+	bp=Obstacle[p,1]
+	teta=Obstacle[p,2]
+	temp = exp(im*k * cos(Beta-teta) * bp)
+
+	for m = -Np:Np
+		idx   = m + Np + 1
+		Dm[idx] = temp * exp(im * (pi*0.5 - Beta)* m)
+	end
+
+	return Dm
+end
+
+
+
+function Calcule_B(M,Np Obstacle, Beta,k)
+	B=zeros(Complex{Float32}, (2*Np +1)*M, 1)
+	for i=1:M
+		dm=dmp(i,Obstacle,Beta,k)
+		ap=Obstacle[p,3]
+		
+		for m=-Np:Np
+			temp=m + Np + 1
+			idx=  temp+ (i-1)*(2*Np +1)
+			B[idx]=-besselj(ap*k)/besselh(k*ap)* dm[temp]
+		end
+	end
+	return B
+end
+
+function Apq(p,q,Np,Nq,k, Obstacle)
+	if p==q
+		return eye(2*Np+1)
+	else
+		ap=Obstacle[p,3]
+		b=distance(Obstacle[p,1], Obstacle[p,2], Obstacle[q,1], Obstacle[q,2])
+		teta=angle(Obstacle[p,1], Obstacle[p,2], Obstacle[q,1], Obstacle[q,2])
+		A=zeros(2*Np+1, 2*Nq+1)
+
+		for m =1:2*Np+1
+			for n= 1:2*Nq+1
+				A[m,n]=besselj(ap*k)/besselh(ap*k) * Smn(m,n,b,teta,k)
+			end
+		end
+
+		return A
+	end	
+end
+
+
+function Calcule_A(M,Np, Obstacle, k)
+	
+	for i = 1:M
+
+		for j = 1:M
+			if j==1
+				Al=Apq(i,j,Obstacle[i,4],Obstacle[j,4],k, Obstacle)
+			else
+
+				Al=vcat(Al, Apq(i,j,Obstacle[i,4],Obstacle[j,4],k, Obstacle))
+			end
+		end
+
+		if i==1
+			A=Al
+		else 
+			A=hcat(A,Al)
+		end
+	end
+	return A
 end
