@@ -44,6 +44,11 @@ function coordonnees_from_cart(x,y,h,taille_espace)
 	return(i,j)
 end
 
+function distance(x1,y1,x2,y2)
+	d=sqrt((x2-x1)^(2)+(y2-y1)^(2))
+	return(d)
+end
+
 	#export coordonnees
 
 #end
