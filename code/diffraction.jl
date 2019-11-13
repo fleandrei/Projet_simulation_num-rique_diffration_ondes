@@ -1,3 +1,6 @@
+include("./polar.jl")
+
+
 # Calcule l'onde diffractée complexe U
 function calculUp(r,teta, Cm, Np)
 	#N=length(Cm)
@@ -118,8 +121,8 @@ end
 
 function dmp(p, Obstacle, Beta, Np,k)
 	Dm = ones(Complex{Float32}, 2*Np +1, 1)
-	bp=Obstacle[p,1]
-	teta=Obstacle[p,2]
+	println(p)
+	bp,teta=conversion_polaire(Obstacle[p][1], Obstacle[p][2])
 	temp = exp(im*k * cos(Beta-teta) * bp)
 
 	for m = -Np:Np
@@ -132,10 +135,10 @@ end
 
 
 
-function Calcule_B(M,Np Obstacle, Beta,k)
+function Calcule_B(M,Np, Obstacle, Beta,k)
 	B=zeros(Complex{Float32}, (2*Np +1)*M, 1)
 	for i=1:M
-		dm=dmp(i,Obstacle,Beta,k)
+		dm=dmp(i,Obstacle,Beta,Np,k)
 		ap=Obstacle[p,3]
 		
 		for m=-Np:Np
@@ -151,9 +154,9 @@ function Apq(p,q,Np,Nq,k, Obstacle)
 	if p==q
 		return eye(2*Np+1)
 	else
-		ap=Obstacle[p,3]
-		b=distance(Obstacle[p,1], Obstacle[p,2], Obstacle[q,1], Obstacle[q,2])
-		teta=angle(Obstacle[p,1], Obstacle[p,2], Obstacle[q,1], Obstacle[q,2])
+		ap=Obstacle[p][3]
+		b=distance(Obstacle[p][1], Obstacle[p][2], Obstacle[q][1], Obstacle[q][2])
+		teta=angle(Obstacle[p][1], Obstacle[p][2], Obstacle[q][1], Obstacle[q][2])
 		A=zeros(2*Np+1, 2*Nq+1)
 
 		for m =1:2*Np+1
@@ -167,16 +170,16 @@ function Apq(p,q,Np,Nq,k, Obstacle)
 end
 
 
-function Calcule_A(M,Np, Obstacle, k)
+function Calcule_A(M, Obstacle, k)
 	
 	for i = 1:M
 
 		for j = 1:M
 			if j==1
-				Al=Apq(i,j,Obstacle[i,4],Obstacle[j,4],k, Obstacle)
+				Al=Apq(i,j,Obstacle[i][4],Obstacle[j][4],k, Obstacle)
 			else
 
-				Al=vcat(Al, Apq(i,j,Obstacle[i,4],Obstacle[j,4],k, Obstacle))
+				Al=vcat(Al, Apq(i,j,Obstacle[i][4],Obstacle[j][4],k, Obstacle))
 			end
 		end
 
