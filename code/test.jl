@@ -22,11 +22,11 @@ Np=floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3
 
 
 
-Obstacle=[[2,0,1,Np] [0,2,1,Np]]
+Obstacle=[[2,0,1,Np], [0,2,1,Np]]
 
 
 B=Calcule_B(M,Np ,Obstacle, beta,k)
-A=Calcule_A(M,Np, Obstacle, k)
+A=Calcule_A(M, Obstacle, k)
 
-print(A)
-print(B)
+#print(A)
+#print(B)
