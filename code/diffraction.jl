@@ -119,7 +119,8 @@ end
 
 
 
-function dmp(p, Obstacle, Beta, Np,k)
+function dmp(p, Obstacle, Beta,k)
+	Np=Obstacle[p][4]
 	Dm = ones(Complex{Float32}, 2*Np +1, 1)
 	println(p)
 	bp,teta=conversion_polaire(Obstacle[p][1], Obstacle[p][2])
@@ -135,10 +136,11 @@ end
 
 
 
-function Calcule_B(M,Np, Obstacle, Beta,k)
+function Calcule_B(M, Obstacle, Beta,k)
 	B=zeros(Complex{Float32}, (2*Np +1)*M, 1)
 	for i=1:M
-		dm=dmp(i,Obstacle,Beta,Np,k)
+		Np=Obstacle[i][4]
+		dm=dmp(i,Obstacle,Beta,k)
 		ap=Obstacle[i][3]
 		
 		for m=-Np:Np
@@ -150,7 +152,9 @@ function Calcule_B(M,Np, Obstacle, Beta,k)
 	return B
 end
 
-function Apq(p,q,Np,Nq,k, Obstacle)
+function Apq(p,q,k, Obstacle)
+	Np=Obstacle[p][4]
+	Nq=Obstacle[q][4]
 	if p==q
 		return 1*Matrix(I,2*Np+1,2*Np+1)
 	else
@@ -172,28 +176,51 @@ end
 
 function Calcule_A(M, Obstacle, k)
 	
-	#A=zeros(Complex{Float32}, 2*Np+1, (2*Nq+1)*M)
 	
-	A=Apq(1,1,Obstacle[1][4],Obstacle[1][4],k, Obstacle) #Correspond à la première boucle de for j=1
+	A=Apq(1,1,k, Obstacle) #Correspond à la première boucle de for j=1
 	for j = 2:M
 
-		A=vcat(A, Apq(1,j,Obstacle[1][4],Obstacle[j][4],k, Obstacle))
+		A=vcat(A, Apq(1,j,k, Obstacle))
 	end
-	println(A)
-	println("\n")
+	#println(A)
+	#println("\n")
 
 	for i = 2:M
 
-		Al=Apq(i,1,Obstacle[i][4],Obstacle[1][4],k, Obstacle) #Correspond à la première boucle de for j=1
+		Al=Apq(i,1,k, Obstacle) #Correspond à la première boucle de for j=1
 		for j = 2:M
 
-			Al=vcat(Al, Apq(i,j,Obstacle[i][4],Obstacle[j][4],k, Obstacle))
+			Al=vcat(Al, Apq(i,j,k, Obstacle))
 			
 		end
-		println(Al)
-		println("\n")
+		#println(Al)
+		#println("\n")
 		A=hcat(A,Al)
 	
 	end
 	return A
 end
+
+
+function Calcule_C(A,b)
+	
+	return A\b
+end
+
+
+function Extraire_Cm(C,M,Obstacle)
+	Cm=[[] for i=1:M]
+
+	curseur=0
+	for i=1:M
+		
+		Np=Obstacle[i][4]
+		push!(Cm[i],C[curseur+1:curseur+2*Np+1])
+		curseur=curseur+2*Np+1
+		
+	end
+
+	return Cm
+
+end
+
