@@ -50,7 +50,8 @@ function distance(x1,y1,x2,y2)
 end
 
 function angle(x1,y1,x2,y2)
-	alpha=tan(abs(y2-y1)/abs(x2-x1))
+	#alpha=atan(abs(y2-y1)/abs(x2-x1))
+	alpha=atan(y2-y1/x2-x1)
 	return(alpha)
 end
 

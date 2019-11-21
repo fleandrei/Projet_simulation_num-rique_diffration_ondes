@@ -7,6 +7,11 @@ function calculUp(r,teta, Cm, Np)
 	U = 0.0
 	for m = -Np:Np
 		idx = m + Np + 1
+		#println("m = ",m)
+		#println("\nk=",k)
+		#println("\nr=",r)
+		#println("\nk*r",k*r)
+		#println(besselh(m, k*r))
 		U   = U + Cm[idx] * besselh(m, k*r) * exp(im * m * teta)
 	end	
 
@@ -20,6 +25,7 @@ function calculUinc(r,teta, Dm, Np)
 	U = 0.0
 	for m = -Np:Np
 		idx = m + Np + 1
+		
 		U   = U + Dm[idx] * besselj(m, k*r) * exp(im * m * teta)
 	end	
 
@@ -119,7 +125,7 @@ end
 
 
 
-function dmp(p, Obstacle, Beta,k)
+function dmp(p, Obstacle, Beta,k) # Calcule les coeff Fourrier de l'onde incidente pour la boule p
 	Np=Obstacle[p][4]
 	Dm = ones(Complex{Float32}, 2*Np +1, 1)
 	println(p)
@@ -135,12 +141,22 @@ function dmp(p, Obstacle, Beta,k)
 end
 
 
+function Extraire_Dm(M,Obstacle,Beta,k) # Renvoie Tableau de tableau Dm tel que Dm[P]="coeff Fourrier onde incidente pour la boule P"
+	Dm=[[] for i=1:M]
 
-function Calcule_B(M, Obstacle, Beta,k)
+	for i=1:M
+		push!(Dm[i], dmp(i,Obstacle,Beta,k))
+	end
+
+	return Dm
+end
+
+
+function Calcule_B(M, Obstacle, Beta,k,Dm) Calcule le vecteur b du système "Ac=b"
 	B=zeros(Complex{Float32}, (2*Np +1)*M, 1)
 	for i=1:M
 		Np=Obstacle[i][4]
-		dm=dmp(i,Obstacle,Beta,k)
+		dm=Dm[i][1]
 		ap=Obstacle[i][3]
 		
 		for m=-Np:Np
@@ -152,7 +168,7 @@ function Calcule_B(M, Obstacle, Beta,k)
 	return B
 end
 
-function Apq(p,q,k, Obstacle)
+function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matrice A 
 	Np=Obstacle[p][4]
 	Nq=Obstacle[q][4]
 	if p==q
@@ -174,7 +190,7 @@ function Apq(p,q,k, Obstacle)
 end
 
 
-function Calcule_A(M, Obstacle, k)
+function Calcule_A(M, Obstacle, k) Calcule la matrice A du système "Ac=b"
 	
 	
 	A=Apq(1,1,k, Obstacle) #Correspond à la première boucle de for j=1
@@ -202,13 +218,13 @@ function Calcule_A(M, Obstacle, k)
 end
 
 
-function Calcule_C(A,b)
+function Calcule_C(A,b) #Calcule le vecteur c du système: "Ac=b".  Il s'agit du vecteur des coeff de Fourrier des ondes diffractées
 	
 	return A\b
 end
 
 
-function Extraire_Cm(C,M,Obstacle)
+function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système 
 	Cm=[[] for i=1:M]
 
 	curseur=0
@@ -224,3 +240,83 @@ function Extraire_Cm(C,M,Obstacle)
 
 end
 
+function Boule_Proche(Obstacle,x, y,M)
+	
+	MinDist=1000000
+	p=0
+	for i=1:M
+		Dist=distance(x,y,Obstacle[i][1], Obstacle[i][2])
+		if Dist<MinDist
+			MinDist=Dist
+			p=i
+		end
+	end
+	return p
+end
+
+
+function CalculeUq(Obstacle, r, teta, k, p,Cm,M)
+	
+	Np=Obstacle[p][4]
+
+	somme_m=0
+
+	for m=-Np:Np
+		somme_q=0
+		for q=1:M
+			if q != p
+				Nq=Obstacle[q][4]
+				somme_n=0
+				x1=Obstacle[p][1]
+				y1=Obstacle[p][2]
+				x2=Obstacle[q][1]
+				y2=Obstacle[q][2]
+				bpq=distance(x1,y1,x2,y2)
+				anglepq=angle(x1,y1,x2,y2)
+				Cq=Cm[q][1]
+				for n=-Nq:Nq
+					somme_n=somme_n+ Smn(n,m,bpq,anglepq, k)*Cq[n+Nq+1]
+				end
+				somme_q=somme_q + somme_n
+			end
+		end
+		somme_m= somme_m +	somme_q * Phi_Chap(m,r,teta,k)
+
+	end
+
+	return somme_m
+
+end
+
+
+
+function Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p)
+
+	
+	U=calculUp(r,teta, Cm[p][1], Np) + CalculeUq(Obstacle, r, teta, k, p,Cm,M)
+
+	return U
+end
+
+function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M)
+	p=Boule_Proche(Obstacle,x,y,M)
+	Np=Obstacle[p][4]
+	r=distance(Obstacle[p][1], Obstacle[p][2], x,y)
+	teta=angle(Obstacle[p][1], Obstacle[p][2], x,y)
+
+	Utot= abs(Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p) + calculUinc(r,teta, Dm[p][1], Np))
+
+	return Utot
+
+end
+
+
+function Is_inDisk(x,y,Obstacle,M)
+	for i=1:M
+		if distance(x,y,Obstacle[i][1], Obstacle[i][2]) <= Obstacle[i][3]
+			return true
+		end
+	end
+
+	return false
+end
