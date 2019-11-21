@@ -51,7 +51,29 @@ end
 
 function angle(x1,y1,x2,y2)
 	#alpha=atan(abs(y2-y1)/abs(x2-x1))
-	alpha=atan(y2-y1/x2-x1)
+	# alpha=atan((y2-y1)/(x2-x1))
+	# if alpha < 0
+	# 	alpha = 2*pi + alpha
+	# end
+	x = x2 -x1
+	y = y2 -y1
+
+	if (x > 0 && y >= 0)
+		alpha = atan(y/x)
+
+	elseif(x > 0 && y < 0)
+		alpha = atan(y/x) + 2*pi
+
+	elseif(x < 0)
+		alpha = atan(y/x) + pi
+
+	elseif(x == 0 && y > 0)
+		alpha = pi/2
+
+	else
+		alpha = 3*pi /2
+	    
+	end
 	return(alpha)
 end
 

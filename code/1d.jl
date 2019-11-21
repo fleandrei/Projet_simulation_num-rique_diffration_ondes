@@ -32,7 +32,7 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 	Np=floor(Int64, k*a_ + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*a_)^(1/3) +1)
 
 	#Cm,Dm,Hm=CDH(bp_, alphap_, alpha_, Np, k)
-	Cm=CoeFourrier_OndeRefracte(bp_, alphap_, alpha_, Np, k, a)
+	Cm=CoeFourrier_OndeDifracte(bp_, alphap_, alpha_, Np, k, a)
 	Dm=CoeFourrier_OndeInc(bp_, alphap_, alpha_, Np, k)
 	
 	# declaration de la matrice
@@ -55,7 +55,7 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 	# Affichage graphique
 	
 	imshow(M, extent=(-3, 3, -3, 3))
-	savefig("res.svg")
+	savefig("res1d.svg")
 end
 
 

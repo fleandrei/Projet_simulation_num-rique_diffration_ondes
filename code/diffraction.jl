@@ -13,6 +13,7 @@ function calculUp(r,teta, Cm, Np)
 		#println("\nk*r",k*r)
 		#println(besselh(m, k*r))
 		U   = U + Cm[idx] * besselh(m, k*r) * exp(im * m * teta)
+		#println("U vaut ", U, "  Cm[i] = ",Cm[idx],"\n")
 	end	
 
 	return U
@@ -152,7 +153,7 @@ function Extraire_Dm(M,Obstacle,Beta,k) # Renvoie Tableau de tableau Dm tel que 
 end
 
 
-function Calcule_B(M, Obstacle, Beta,k,Dm) Calcule le vecteur b du système "Ac=b"
+function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac=b"
 	B=zeros(Complex{Float32}, (2*Np +1)*M, 1)
 	for i=1:M
 		Np=Obstacle[i][4]
@@ -184,13 +185,14 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 				A[m,n]=besselj(m,ap*k)/besselh(m, ap*k) * Smn(m,n,b,teta,k)
 			end
 		end
+		println(A,"\n b = ",b," teta = ",teta,"\n")
 
 		return A
 	end	
 end
 
 
-function Calcule_A(M, Obstacle, k) Calcule la matrice A du système "Ac=b"
+function Calcule_A(M, Obstacle, k) #Calcule la matrice A du système "Ac=b"
 	
 	
 	A=Apq(1,1,k, Obstacle) #Correspond à la première boucle de for j=1
@@ -292,9 +294,10 @@ end
 
 function Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p)
 
-	
-	U=calculUp(r,teta, Cm[p][1], Np) + CalculeUq(Obstacle, r, teta, k, p,Cm,M)
-
+	Up = calculUp(r,teta, Cm[p][1], Np)
+	Uq = CalculeUq(Obstacle, r, teta, k, p,Cm,M)
+	U= Up + Uq 
+	# println("Up = ",Up, " , Uq = ",Uq, ", U = ",U,"\n")
 	return U
 end
 
@@ -303,8 +306,10 @@ function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M)
 	Np=Obstacle[p][4]
 	r=distance(Obstacle[p][1], Obstacle[p][2], x,y)
 	teta=angle(Obstacle[p][1], Obstacle[p][2], x,y)
-
-	Utot= abs(Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p) + calculUinc(r,teta, Dm[p][1], Np))
+	Udiff = Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p)
+	Uint  = calculUinc(r,teta, Dm[p][1], Np)
+	Utot= abs(Udiff + Uint)
+	#println("Udiff = ",Udiff, " , Uint = ",Uint, ", Utot = ",Utot,"\n")
 
 	return Utot
 

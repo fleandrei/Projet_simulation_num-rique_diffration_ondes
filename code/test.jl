@@ -33,6 +33,7 @@ function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
 			#println("x=",x,"  y=",y,"  r=",r)
 			if !Is_inDisk(x,y,Obstacle, NbrObstacle)
 				M[i,j]=Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, NbrObstacle)
+				println("M[",i,",",j,"] = ", M[i,j],"\n")
 				#println(" autre=",r)
 			end
 		end
@@ -41,7 +42,7 @@ function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
 	# Affichage graphique
 	
 	imshow(M, extent=(-3, 3, -3, 3))
-	savefig("res.svg")
+	savefig("resMult.svg")
 end
 
 
@@ -53,7 +54,7 @@ Np=floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3
 
 
 
-Obstacle=[[2,0,1,Np], [0,2,1,Np]]
+Obstacle=[[0,1,1,Np], [0,-1,1,Np]]
 
 Dm=Extraire_Dm(NbrObstacle, Obstacle, beta, k)
 B=Calcule_B(NbrObstacle ,Obstacle, beta,k,Dm)
@@ -61,7 +62,14 @@ A=Calcule_A(NbrObstacle, Obstacle, k)
 C=Calcule_C(A,B)
 
 
+# println(Dm)
+#println(A)
+# println(B)
+# println(C)
+
+
 Cm=Extraire_Cm(C,NbrObstacle,Obstacle)
+# println(Cm)
 
 
 
