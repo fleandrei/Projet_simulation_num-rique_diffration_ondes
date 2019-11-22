@@ -32,7 +32,7 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 	Np=floor(Int64, k*a_ + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*a_)^(1/3) +1)
 
 	#Cm,Dm,Hm=CDH(bp_, alphap_, alpha_, Np, k)
-	Cm=CoeFourrier_OndeDifracte(bp_, alphap_, alpha_, Np, k, a)
+	Cm=CoeFourrier_OndeDiffracte(bp_, alphap_, alpha_, Np, k, a)
 	Dm=CoeFourrier_OndeInc(bp_, alphap_, alpha_, Np, k)
 	
 	# declaration de la matrice
@@ -47,6 +47,8 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 			#println("x=",x,"  y=",y,"  r=",r)
 			if r >= a_
 				M[i,j]=abs(calculUp(r, lambda, Cm, Np)+calculUinc(r, lambda, Dm, Np))
+				#M[i,j]=abs(calculUinc(r, lambda, Dm, Np))
+				#M[i,j]=abs(calculUp(r, lambda, Cm, Np))
 				#println(" autre=",r)
 			end
 		end

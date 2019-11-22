@@ -17,7 +17,7 @@ taille_matrice=convert(Int64, taille_espace*1/h)
 
 beta=pi #Angle de l'onde incidente
 e=10^(-12)
-NbrObstacle=2
+NbrObstacle=1
 	
 #####Function########	
 function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
@@ -54,7 +54,7 @@ Np=floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3
 
 
 
-Obstacle=[[0,1,1,Np], [0,-1,1,Np]]
+Obstacle=[[0,0,1,Np]]#, [0,-1,1,Np]]
 
 Dm=Extraire_Dm(NbrObstacle, Obstacle, beta, k)
 B=Calcule_B(NbrObstacle ,Obstacle, beta,k,Dm)

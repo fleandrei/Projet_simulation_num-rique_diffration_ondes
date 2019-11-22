@@ -12,7 +12,7 @@ function calculUp(r,teta, Cm, Np)
 		#println("\nr=",r)
 		#println("\nk*r",k*r)
 		#println(besselh(m, k*r))
-		U   = U + Cm[idx] * besselh(m, k*r) * exp(im * m * teta)
+		U   = U + Cm[idx] * Phi(m,r, teta,k)
 		#println("U vaut ", U, "  Cm[i] = ",Cm[idx],"\n")
 	end	
 
@@ -27,7 +27,7 @@ function calculUinc(r,teta, Dm, Np)
 	for m = -Np:Np
 		idx = m + Np + 1
 		
-		U   = U + Dm[idx] * besselj(m, k*r) * exp(im * m * teta)
+		U   = U + Dm[idx] * Phi_Chap(m,r,teta,k)
 	end	
 
 	return U
@@ -257,58 +257,88 @@ function Boule_Proche(Obstacle,x, y,M)
 end
 
 
-function CalculeUq(Obstacle, r, teta, k, p,Cm,M)
+# function CalculeUq(Obstacle, r, teta, k, p,Cm,M)
 	
-	Np=Obstacle[p][4]
+# 	Np=Obstacle[p][4]
 
-	somme_m=0
+# 	somme_m=0
 
-	for m=-Np:Np
-		somme_q=0
-		for q=1:M
-			if q != p
-				Nq=Obstacle[q][4]
-				somme_n=0
-				x1=Obstacle[p][1]
-				y1=Obstacle[p][2]
-				x2=Obstacle[q][1]
-				y2=Obstacle[q][2]
-				bpq=distance(x1,y1,x2,y2)
-				anglepq=angle(x1,y1,x2,y2)
-				Cq=Cm[q][1]
-				for n=-Nq:Nq
-					somme_n=somme_n+ Smn(n,m,bpq,anglepq, k)*Cq[n+Nq+1]
-				end
-				somme_q=somme_q + somme_n
-			end
-		end
-		somme_m= somme_m +	somme_q * Phi_Chap(m,r,teta,k)
+# 	for m=-Np:Np
+# 		somme_q=0
+# 		for q=1:M
+# 			if q != p
+# 				Nq=Obstacle[q][4]
+# 				somme_n=0
+# 				x1=Obstacle[p][1]
+# 				y1=Obstacle[p][2]
+# 				x2=Obstacle[q][1]
+# 				y2=Obstacle[q][2]
+# 				bpq=distance(x1,y1,x2,y2)
+# 				anglepq=angle(x1,y1,x2,y2)
+# 				Cq=Cm[q][1]
+# 				for n=-Nq:Nq
+# 					somme_n=somme_n+ Smn(n,m,bpq,anglepq, k)*Cq[n+Nq+1]
+# 				end
+# 				somme_q=somme_q + somme_n
+# 			end
+# 		end
+# 		somme_m= somme_m +	somme_q * Phi_Chap(m,r,teta,k)
 
+# 	end
+
+# 	return somme_m
+
+# end
+
+
+function CalculeUq(Obstacle, x,y, k,Cm,M)
+
+	somme_q = 0
+
+	for q = 1:M
+		somme_n=0
+
+		Nq = Obstacle[q][4]
+		
+		x1 = Obstacle[q][1]
+		y1 = Obstacle[q][2]
+		x2 = x
+		y2 = y
+		b  = distance(x1,y1,x2,y2)
+		anglepq = angle(x1,y1,x2,y2)
+		Cq = Cm[q][1]
+
+		somme_q = somme_q + calculUp(b, anglepq, Cq, Nq)
 	end
 
-	return somme_m
+	return somme_q
 
 end
 
 
+# function Calcule_UDiff_MultiDisk(Obstacle,x,y,Cm,k,M)
 
-function Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p)
-
-	Up = calculUp(r,teta, Cm[p][1], Np)
-	Uq = CalculeUq(Obstacle, r, teta, k, p,Cm,M)
-	U= Up + Uq 
-	# println("Up = ",Up, " , Uq = ",Uq, ", U = ",U,"\n")
-	return U
-end
+# 	#           m m Up = calculUp(r,teta, Cm[p][1], Np)
+# 	Uq = CalculeUq(Obstacle, x, y, k, Cm, M)
+# 	U  = Uq 
+# 	# println("Up = ",Up, " , Uq = ",Uq, ", U = ",U,"\n")
+# 	return U
+# end
 
 function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M)
-	p=Boule_Proche(Obstacle,x,y,M)
-	Np=Obstacle[p][4]
-	r=distance(Obstacle[p][1], Obstacle[p][2], x,y)
-	teta=angle(Obstacle[p][1], Obstacle[p][2], x,y)
-	Udiff = Calcule_UDiff_MultiDisk(Obstacle,r,teta,Cm,k,M,p)
+	
+	p     = Boule_Proche(Obstacle,x,y,M)
+	Np    = Obstacle[p][4]
+	r     = distance(Obstacle[p][1], Obstacle[p][2], x,y)
+	teta  = angle(Obstacle[p][1], Obstacle[p][2], x,y)
 	Uint  = calculUinc(r,teta, Dm[p][1], Np)
-	Utot= abs(Udiff + Uint)
+
+
+	#Udiff = Calcule_UDiff_MultiDisk(Obstacle,x,y,Cm,k,M)
+	Udiff = CalculeUq(Obstacle, x, y, k, Cm, M)
+	
+
+	Utot  = abs(Udiff + Uint)
 	#println("Udiff = ",Udiff, " , Uint = ",Uint, ", Utot = ",Utot,"\n")
 
 	return Utot
