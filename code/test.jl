@@ -9,15 +9,15 @@ include("./diffraction.jl")
 #using Polar
 #import Polar
 
-k = 2*pi
-lambda = 2*pi/k # longueur d'onde
-h = lambda/60  #pas de la grille
-taille_espace=6 # taille total de la grille
-taille_matrice=convert(Int64, taille_espace*1/h)
+k              = 2*pi
+lambda         = 2*pi/k # longueur d'onde
+h              = lambda/60  #pas de la grille
+taille_espace  = 6 # taille total de la grille
+taille_matrice = convert(Int64, taille_espace*1/h)
 
-beta=pi #Angle de l'onde incidente
-e=10^(-12)
-NbrObstacle=1
+beta = pi #Angle de l'onde incidente
+e    = 10^(-12)
+NbrObstacle = 2
 	
 #####Function########	
 function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
@@ -27,14 +27,16 @@ function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
 	
 	# Parcoure et remplissage de la matrice
 	for i = 1:taille_matrice
-		for j=1:taille_matrice
-			x,y=coordonnees(i, j, h, taille_espace)
-			r,lambda=conversion_polaire(x, y)
-			#println("x=",x,"  y=",y,"  r=",r)
+
+		for j = 1:taille_matrice
+
+			x,y      = coordonnees(i, j, h, taille_espace)
+			r,lambda = conversion_polaire(x, y)
+
 			if !Is_inDisk(x,y,Obstacle, NbrObstacle)
-				M[i,j]=Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, NbrObstacle)
+
+				M[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, NbrObstacle)
 				println("M[",i,",",j,"] = ", M[i,j],"\n")
-				#println(" autre=",r)
 			end
 		end
 	end
@@ -50,16 +52,16 @@ end
 
 ##########CODE############
 
-Np=floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3) +1)
+Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3) +1)
 
 
 
-Obstacle=[[0,0,1,Np]]#, [0,-1,1,Np]]
+Obstacle=[[-2,0,1,Np], [2,0,1,Np]]
 
-Dm=Extraire_Dm(NbrObstacle, Obstacle, beta, k)
-B=Calcule_B(NbrObstacle ,Obstacle, beta,k,Dm)
-A=Calcule_A(NbrObstacle, Obstacle, k)
-C=Calcule_C(A,B)
+Dm = Extraire_Dm(NbrObstacle, Obstacle, beta, k)
+B  = Calcule_B(NbrObstacle ,Obstacle, beta,k,Dm)
+A  = Calcule_A(NbrObstacle, Obstacle, k)
+C  = Calcule_C(A,B)
 
 
 # println(Dm)
@@ -68,7 +70,7 @@ C=Calcule_C(A,B)
 # println(C)
 
 
-Cm=Extraire_Cm(C,NbrObstacle,Obstacle)
+Cm = Extraire_Cm(C,NbrObstacle,Obstacle)
 # println(Cm)
 
 

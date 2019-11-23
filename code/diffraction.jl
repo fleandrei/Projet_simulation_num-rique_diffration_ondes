@@ -3,17 +3,13 @@ using LinearAlgebra
 
 # Calcule l'onde diffractée complexe U
 function calculUp(r,teta, Cm, Np)
-	#N=length(Cm)
+
 	U = 0.0
+
 	for m = -Np:Np
+
 		idx = m + Np + 1
-		#println("m = ",m)
-		#println("\nk=",k)
-		#println("\nr=",r)
-		#println("\nk*r",k*r)
-		#println(besselh(m, k*r))
 		U   = U + Cm[idx] * Phi(m,r, teta,k)
-		#println("U vaut ", U, "  Cm[i] = ",Cm[idx],"\n")
 	end	
 
 	return U
@@ -22,11 +18,11 @@ end
 
 # Calcule l'onde incidente complexe U
 function calculUinc(r,teta, Dm, Np)
-	#N=length(Cm)
+
 	U = 0.0
 	for m = -Np:Np
+
 		idx = m + Np + 1
-		
 		U   = U + Dm[idx] * Phi_Chap(m,r,teta,k)
 	end	
 
@@ -46,10 +42,12 @@ function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie,
 	temp = exp(im*k * cos(alpha-alphap) * bp)
 
 	for m = -Np:Np
+
 		idx     = m + Np + 1
 		Dm[idx] = temp * exp(im * (pi*0.5 - alpha) * m)
 		Hm[idx] = besselh( m, a*k )
 		Cm[idx] = besselj( m, a*k ) * Hm[idx]^(-1) * Dm[idx]
+
 	end
 
 	return (Cm,Dm,Hm)
@@ -57,11 +55,13 @@ end
 
 
 function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
+
 	Dm   = zeros(Complex{Float32}, 2*Np +1, 1)
 	temp = exp(im*k * cos(alpha-alphap) * bp)
 
 	for m = -Np:Np
-		idx   = m + Np + 1
+
+		idx     = m + Np + 1
 		Dm[idx] = temp * exp(im * (pi*0.5 - alpha)* m)
 	end
 
@@ -75,6 +75,7 @@ function BesselHVector(Np,a,k)
 	temp = a * k
 
 	for m = -Np:Np
+
 		idx     = m + Np + 1
 		Hm[idx] = besselh(m, temp)
 	end
@@ -90,6 +91,7 @@ function Calcule_b(bp,alphap,alpha,Np, k, a)
 	temp = a * k
 
 	for m = -Np:Np
+
 		idx    = m + Np + 1
 		b[idx] = besselj(m, temp) * Dm[idx]
 	end
@@ -104,7 +106,6 @@ function CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a)
 	Cm = zeros(Complex{Float32},2*Np+1,1)
 	b  = Calcule_b(bp, alphap, alpha, Np, k, a)
 	Hm = BesselHVector(Np, a, k)
-	#A=zeros(Complex{Float32},2*Np+1, 2*Np+1)
 	A  = Matrix(I, 2*Np+1, 2*Np+1)
 	A  = A.*Hm
 	Cm = A\b
@@ -112,13 +113,16 @@ function CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a)
 	return Cm
 end
 
+
 function Phi(m,rp, teta,k)
 	return besselh(m, k*rp)*exp(im*m*teta)
 end
 
+
 function Phi_Chap(m,rp,teta,k)
 	return besselj(m, rp*k)*exp(im*m*teta)
 end
+
 
 function Smn(m,n,b,teta, k)
 	return Phi(m-n,b, teta,k)
@@ -127,14 +131,15 @@ end
 
 
 function dmp(p, Obstacle, Beta,k) # Calcule les coeff Fourrier de l'onde incidente pour la boule p
-	Np=Obstacle[p][4]
-	Dm = ones(Complex{Float32}, 2*Np +1, 1)
-	println(p)
-	bp,teta=conversion_polaire(Obstacle[p][1], Obstacle[p][2])
-	temp = exp(im*k * cos(Beta-teta) * bp)
+	
+	Np      = Obstacle[p][4]
+	Dm      = ones(Complex{Float32}, 2*Np +1, 1)
+	bp,teta = conversion_polaire(Obstacle[p][1], Obstacle[p][2])
+	temp    = exp(im*k * cos(Beta-teta) * bp)
 
 	for m = -Np:Np
-		idx   = m + Np + 1
+
+		idx     = m + Np + 1
 		Dm[idx] = temp * exp(im * (pi*0.5 - Beta)* m)
 	end
 
@@ -143,7 +148,7 @@ end
 
 
 function Extraire_Dm(M,Obstacle,Beta,k) # Renvoie Tableau de tableau Dm tel que Dm[P]="coeff Fourrier onde incidente pour la boule P"
-	Dm=[[] for i=1:M]
+	Dm = [[] for i=1:M]
 
 	for i=1:M
 		push!(Dm[i], dmp(i,Obstacle,Beta,k))
@@ -154,31 +159,45 @@ end
 
 
 function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac=b"
-	B=zeros(Complex{Float32}, (2*Np +1)*M, 1)
-	for i=1:M
-		Np=Obstacle[i][4]
-		dm=Dm[i][1]
-		ap=Obstacle[i][3]
+	
+	B = zeros(Complex{Float32}, (2*Np +1)*M, 1)
+	for i = 1:M
+
+		Np = Obstacle[i][4]
+		dm = Dm[i][1]
+		ap = Obstacle[i][3]
 		
-		for m=-Np:Np
-			temp=m + Np + 1
-			idx=  temp+ (i-1)*(2*Np +1)
-			B[idx]=-besselj(m,ap*k)/besselh(m,k*ap)* dm[temp]
+		for m = -Np:Np
+
+			temp   = m + Np + 1
+			idx    = temp + (i-1)*(2*Np +1)
+			B[idx] = -besselj(m,ap*k)/besselh(m,k*ap)* dm[temp]
 		end
 	end
+
 	return B
 end
 
 function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matrice A 
-	Np=Obstacle[p][4]
-	Nq=Obstacle[q][4]
-	if p==q
+	
+	Np = Obstacle[p][4]
+	Nq = Obstacle[q][4]
+
+	if p == q
+
 		return 1*Matrix(I,2*Np+1,2*Np+1)
 	else
-		ap=Obstacle[p][3]
-		b=distance(Obstacle[p][1], Obstacle[p][2], Obstacle[q][1], Obstacle[q][2])
-		teta=angle(Obstacle[p][1], Obstacle[p][2], Obstacle[q][1], Obstacle[q][2])
-		A=zeros(Complex{Float32}, 2*Np+1, 2*Nq+1)
+
+		xp = Obstacle[p][1]
+		yp = Obstacle[p][2]
+		ap = Obstacle[p][3]
+
+		xq = Obstacle[q][1]
+		yq = Obstacle[q][2]
+
+		b    = distance(xp, yp, xq, yq)
+		teta = angle(xp, yp, xq, yq)
+		A    = zeros(Complex{Float32}, 2*Np+1, 2*Nq+1)
 
 		for m =1:2*Np+1
 			for n= 1:2*Nq+1
@@ -326,20 +345,18 @@ end
 # end
 
 function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M)
-	
+
 	p     = Boule_Proche(Obstacle,x,y,M)
 	Np    = Obstacle[p][4]
 	r     = distance(Obstacle[p][1], Obstacle[p][2], x,y)
 	teta  = angle(Obstacle[p][1], Obstacle[p][2], x,y)
-	Uint  = calculUinc(r,teta, Dm[p][1], Np)
+	
+	Uinc  = calculUinc(r,teta, Dm[p][1], Np)
 
-
-	#Udiff = Calcule_UDiff_MultiDisk(Obstacle,x,y,Cm,k,M)
 	Udiff = CalculeUq(Obstacle, x, y, k, Cm, M)
 	
 
-	Utot  = abs(Udiff + Uint)
-	#println("Udiff = ",Udiff, " , Uint = ",Uint, ", Utot = ",Utot,"\n")
+	Utot = abs( Uinc - Udiff )
 
 	return Utot
 
@@ -347,7 +364,8 @@ end
 
 
 function Is_inDisk(x,y,Obstacle,M)
-	for i=1:M
+	for i = 1:M
+
 		if distance(x,y,Obstacle[i][1], Obstacle[i][2]) <= Obstacle[i][3]
 			return true
 		end
