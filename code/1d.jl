@@ -46,9 +46,9 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 			r,lambda=conversion_polaire(x, y)
 			#println("x=",x,"  y=",y,"  r=",r)
 			if r >= a_
-				#M[i,j]=abs(calculUp(r, lambda, Cm, Np)+calculUinc(r, lambda, Dm, Np))
-				M[i,j]=calculUinc(r, lambda, Dm, Np)
-				#M[i,j]=abs(calculUp(r, lambda, Cm, Np))
+				M[i,j]=abs(calculUp(r, lambda, Cm, Np)+calculUinc(r, lambda, Dm, Np))
+				#M[i,j]=real(calculUinc(r, lambda, Dm, Np))
+				#M[i,j]=real(calculUp(r, lambda, Cm, Np))
 				#println(" autre=",r)
 			end
 		end
