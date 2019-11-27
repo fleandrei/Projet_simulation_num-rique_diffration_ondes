@@ -8,7 +8,7 @@ include("./polar.jl")
 include("./diffraction.jl")
 
 
-
+#Pour fixer le nombre de threads, il faut faire "export JULIA_NUM_THREADS=4" dans le terminal
 
 
 function Prod_Scalaire(X,Y)
