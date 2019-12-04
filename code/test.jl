@@ -11,7 +11,7 @@ include("./diffraction.jl")
 
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
-h              = lambda/60  #pas de la grille
+h              = lambda/30  #pas de la grille
 taille_espace  = 10 # taille total de la grille
 taille_matrice = convert(Int64, taille_espace*1/h)
 
@@ -20,7 +20,7 @@ e    = 10^(-12)
 M = 2
 	
 #####Function########	
-function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
+function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 
 # declaration de la matrice
 	Image = zeros(Float64, taille_matrice, taille_matrice)
@@ -35,7 +35,7 @@ function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
 
 			if !Is_inDisk(x,y,Obstacle, M)
 
-				Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M)
+				Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
 				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
 			end
 		end
@@ -44,7 +44,7 @@ function Image_Mulit(obstacle,Cm,Dm, NbrObstacle)
 	
 	# Affichage graphique
 	
-	imshow(Image, extent=(-5, 5, -5, 5))
+	imshow(transpose(Image), extent=(-5, 5, -5, 5))
 	savefig("resMult.svg")
 end
 
@@ -57,7 +57,7 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 
 
 
-Obstacle=[[0,2,1,Np], [0,-2,1,Np]]
+Obstacle=[[-4,-4,1,Np], [4,4,0.01,1]]
 println(Np,"\n")
 
 Dm = Extraire_Dm(M, Obstacle, beta, k)
@@ -77,4 +77,4 @@ Cm = Extraire_Cm(C,M,Obstacle)
 
 
 
-Image_Mulit(Obstacle,Cm,Dm,M)
+Image_Mulit(Obstacle,Cm,Dm,M,beta)

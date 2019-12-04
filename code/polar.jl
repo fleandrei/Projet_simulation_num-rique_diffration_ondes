@@ -1,4 +1,5 @@
 #module Polar
+import Base.angle
 
 # a partir de l'indice d'une matrice donne les coordonnées cartésiennes
 function coordonnees(i,j,h,taille_espace) 
@@ -10,22 +11,9 @@ end
 # convertit les cartésiennes en polaires
 function conversion_polaire(x,y)
 	r=sqrt(x*x+y*y)
-	if (x > 0 && y >= 0)
-		lambda = atan(y/x)
-
-	elseif(x > 0 && y < 0)
-		lambda = atan(y/x) + 2*pi
-
-	elseif(x < 0)
-		lambda = atan(y/x) + pi
-
-	elseif(x == 0 && y > 0)
-		lambda = pi/2
-
-	else
-		lambda = 3*pi /2
-	    
-	end
+	
+	# lambda = angle(x+y)
+	lambda = atan(x,y)
 
 	return(r,lambda)
 end
@@ -34,7 +22,7 @@ end
 function conversion_cart(r,lambda)
 	x=r*cos(lambda)
 	y=r*sin(lambda)
-	return(x,y)
+	return(y,x)
 end
 
 # convertit les cartésiens en coordonnées matricielles
@@ -49,31 +37,14 @@ function distance(x1,y1,x2,y2)
 	return(d)
 end
 
-function angle(x1,y1,x2,y2)
-	#alpha=atan(abs(y2-y1)/abs(x2-x1))
-	# alpha=atan((y2-y1)/(x2-x1))
-	# if alpha < 0
-	# 	alpha = 2*pi + alpha
-	# end
+function angle_2p(x1,y1,x2,y2)
+	
 	x = x2 -x1
 	y = y2 -y1
 
-	if (x > 0 && y >= 0)
-		alpha = atan(y/x)
-
-	elseif(x > 0 && y < 0)
-		alpha = atan(y/x) + 2*pi
-
-	elseif(x < 0)
-		alpha = atan(y/x) + pi
-
-	elseif(x == 0 && y > 0)
-		alpha = pi/2
-
-	else
-		alpha = 3*pi /2
-	    
-	end
+	
+	alpha = atan(y,x)
+	# alpha = angle(x+y) 
 	return(alpha)
 end
 

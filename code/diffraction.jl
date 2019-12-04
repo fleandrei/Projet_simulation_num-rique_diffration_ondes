@@ -29,6 +29,15 @@ function calculUinc(r,teta, Dm, Np)
 	return U
 end
 
+# Calcule l'onde incidente complexe U
+function calculUinc_exact(x,y,Beta,k)
+
+	prod_scal = x*cos(Beta) + y*sin(Beta)
+	U = exp(im*k*prod_scal)
+
+	return U
+end
+
 
 function calculRCS(U)
 	return 10 * log10(2*pi * abs(U)^2)
@@ -36,9 +45,9 @@ end
 
 
 function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie, Dm: Coef Fourrier onde incidente, Hm: vecteur Besselh
-	Cm   = zeros(Complex{Float32}, 2*Np + 1, 1)
-	Dm   = zeros(Complex{Float32}, 2*Np + 1, 1)
-	Hm   = zeros(Complex{Float32}, 2*Np + 1, 1)
+	Cm   = zeros(Complex{Float64}, 2*Np + 1, 1)
+	Dm   = zeros(Complex{Float64}, 2*Np + 1, 1)
+	Hm   = zeros(Complex{Float64}, 2*Np + 1, 1)
 	temp = exp(im*k * cos(alpha-alphap) * bp)
 
 	for m = -Np:Np
@@ -56,7 +65,7 @@ end
 
 function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k)
 
-	Dm   = zeros(Complex{Float32}, 2*Np +1, 1)
+	Dm   = zeros(Complex{Float64}, 2*Np +1, 1)
 	temp = exp(im*k * cos(alpha-alphap) * bp)
 
 	for m = -Np:Np
@@ -71,7 +80,7 @@ end
 
 function BesselHVector(Np,a,k)
 
-	Hm   = zeros(Complex{Float32},2*Np+1,1)
+	Hm   = zeros(Complex{Float64},2*Np+1,1)
 	temp = a * k
 
 	for m = -Np:Np
@@ -87,13 +96,13 @@ end
 function Calcule_b(bp,alphap,alpha,Np, k, a) 
 
 	Dm   = CoeFourrier_OndeInc(bp, alphap, alpha, Np, k)
-	b    = zeros(Complex{Float32}, 2*Np + 1, 1)
+	b    = zeros(Complex{Float64}, 2*Np + 1, 1)
 	temp = a * k
 
 	for m = -Np:Np
 
 		idx    = m + Np + 1
-		b[idx] = besselj(m, temp) * Dm[idx]
+		b[idx] = - besselj(m, temp) * Dm[idx]
 	end
 
 	return b
@@ -103,12 +112,14 @@ end
 
 function CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a)
 
-	Cm = zeros(Complex{Float32},2*Np+1,1)
+	Cm = zeros(Complex{Float64},2*Np+1,1)
 	b  = Calcule_b(bp, alphap, alpha, Np, k, a)
 	Hm = BesselHVector(Np, a, k)
 	A  = Matrix(I, 2*Np+1, 2*Np+1)
 	A  = A.*Hm
 	Cm = A\b
+
+	println(Cm)
 
 	return Cm
 end
@@ -133,7 +144,10 @@ end
 function dmp(p, Obstacle, Beta,k) # Calcule les coeff Fourrier de l'onde incidente pour la boule p
 	
 	Np      = Obstacle[p][4]
-	Dm      = ones(Complex{Float32}, 2*Np +1, 1)
+	Np      = floor(Int, Np) #convert to int
+	println(p)
+	println(Np)
+	Dm      = zeros(Complex{Float64}, 2*Np +1, 1)
 	bp,teta = conversion_polaire(Obstacle[p][1], Obstacle[p][2])
 	temp    = exp(im*k * cos(Beta-teta) * bp)
 
@@ -164,18 +178,26 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 	for i = 1:M
 		N = N + 2*Obstacle[i][4] +1
 	end
+
+	N = floor(Int, N) #convert to int
 	println(N,"\n")
 
-	B = zeros(Complex{Float32}, N, 1)
+	B = zeros(Complex{Float64}, N, 1)
 	for i = 1:M
 
 		Np = Obstacle[i][4]
 		dm = Dm[i][1]
 		ap = Obstacle[i][3]
+
+		Np = floor(Int, Np)
+		#dm = floor(Int, dm)
+		ap = floor(Int, ap)
+
 		
 		for m = -Np:Np
 			if(i > 1)
 				Np_prec = Obstacle[i-1][4]
+				Np_prec = floor(Int, Np_prec) #convert to int
 			else
 				Np_prec = 0 #arbritraire
 			end
@@ -193,18 +215,18 @@ end
 
 function Matrix_S(Np,Nq,b,teta,Obstacle,k)
 	
-	S = zeros(Complex{Float32}, 2*Np +1, 2*Nq +1)
+	S = zeros(Complex{Float64}, 2*Nq +1, 2*Np +1)
 
-	for m =1:2*Np+1
-		for n= 1:2*Nq+1
-			S[m,n] = Smn(m,n,b,teta, k)
+	for n =1:2*Nq+1
+		for m= 1:2*Np+1
+				S[n,m] = Smn(n,m,b,teta, k)
 		end
 	end
 	return S
 end
 
 function Matrix_D(Np,k,ap)
-	D = zeros(Complex{Float32}, 2*Np +1, 2*Np +1)
+	D = zeros(Complex{Float64}, 2*Np +1, 2*Np +1)
 
 	#N = min(Np,Nq)
 	for m = 1:2*Np+1
@@ -237,27 +259,27 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 		yq = Obstacle[q][2]
 
 		b    = distance(xp, yp, xq, yq)
-		teta = angle(xp, yp, xq, yq)
-		A    = zeros(Complex{Float32}, 2*Np+1, 2*Nq+1)
+		teta = angle_2p(xp, yp, xq, yq)
+		A    = zeros(Complex{Float64}, 2*Np+1, 2*Nq+1)
 
-		# D = Matrix_D(Np,k,ap)
-		# S = Matrix_S(Np,Nq,b,teta,Obstacle,k)
+		D = Matrix_D(Np,k,ap)
+		S = Matrix_S(Np,Nq,b,teta,Obstacle,k)
 
-		# println("----------\n")
-		# println(size(D),"\n")
-		# println(size(transpose(S)),"\n")
-		# println("----------\n")
+		println("----------\n")
+		println(size(D),"\n")
+		println(size(transpose(S)),"\n")
+		println("----------\n")
 
-		# A = D * S
+		A = D * transpose(S)
 
 		
 
-		for m =1:2*Np+1
-			D = besselj(m,ap*k)/besselh(m, ap*k)
-			for n= 1:2*Nq+1
-					A[m,n] = D * Smn(m,n,b,teta,k)
-			end
-		end
+		# for m =1:2*Np+1
+		# 	D = besselj(m,ap*k)/besselh(m, ap*k)
+		# 	for n= 1:2*Nq+1
+		# 			A[m,n] = D * Smn(m,n,b,teta,k)
+		# 	end
+		# end
 		# println(A,"\n b = ",b," teta = ",teta,"\n")
 
 		println("----------\n")
@@ -320,7 +342,7 @@ function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système
 		curseur=curseur+2*Np+1
 		
 	end
-	#println(Cm)
+	println(Cm)
 
 	return Cm
 
@@ -358,10 +380,10 @@ end
 # 				x2=Obstacle[q][1]
 # 				y2=Obstacle[q][2]
 # 				bpq=distance(x1,y1,x2,y2)
-# 				anglepq=angle(x1,y1,x2,y2)
+# 				angle_2ppq=angle_2p(x1,y1,x2,y2)
 # 				Cq=Cm[q][1]
 # 				for n=-Nq:Nq
-# 					somme_n=somme_n+ Smn(n,m,bpq,anglepq, k)*Cq[n+Nq+1]
+# 					somme_n=somme_n+ Smn(n,m,bpq,angle_2ppq, k)*Cq[n+Nq+1]
 # 				end
 # 				somme_q=somme_q + somme_n
 # 			end
@@ -389,11 +411,11 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 		x2 = x
 		y2 = y
 		b  = distance(x1,y1,x2,y2)
-		anglepq = angle(x1,y1,x2,y2)
+		angle_2ppq = angle_2p(x1,y1,x2,y2)
 		Cq = Cm[q][1]
 		#println(Cq,"\n")
 
-		somme_q = somme_q + calculUp(b, anglepq, Cq, Nq)
+		somme_q = somme_q + calculUp(b, angle_2ppq, Cq, Nq)
 	end
 
 	return somme_q
@@ -410,23 +432,25 @@ end
 # 	return U
 # end
 
-function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M)
+function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M,Beta)
 
-	p     = Boule_Proche(Obstacle,x,y,M)
-	Np    = Obstacle[p][4]
-	xp    = Obstacle[p][1]
-	yp    = Obstacle[p][2]
+	# p     = Boule_Proche(Obstacle,x,y,M)
+	# Np    = Obstacle[p][4]
+	# xp    = Obstacle[p][1]
+	# yp    = Obstacle[p][2]
 
-	r     = distance(xp, yp, x, y)
-	teta  = angle(xp, yp, x, y)
+	# r     = distance(xp, yp, x, y)
+	# teta  = angle_2p(xp, yp, x, y)
 
-	Uinc  = calculUinc(r,teta, Dm[p][1], Np)
+	# Uinc  = calculUinc(r,teta, Dm[p][1], Np)
+	Uinc  = calculUinc_exact(x,y,Beta,k)
 
 	Udiff = CalculeUq(Obstacle, x, y, k, Cm, M)
 	
 
-	Utot = abs( Uinc - Udiff )
-	#Utot = real(Udiff)
+	Utot = abs( Uinc + Udiff )
+	# Utot = real(Uinc)
+	# Utot = real(Udiff)
 
 	return Utot
 
