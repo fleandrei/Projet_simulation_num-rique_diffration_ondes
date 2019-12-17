@@ -44,7 +44,8 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	
 	# Affichage graphique
 	
-	imshow(transpose(Image), extent=(-5, 5, -5, 5))
+	imshow(transpose(Image), vmin=-2.5, vmax=2.5, extent=(-5, 5, -5, 5))
+	colorbar()
 	savefig("resMult.svg")
 end
 
@@ -57,7 +58,7 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 
 
 
-Obstacle=[[-4,-4,1,Np], [4,4,0.01,1]]
+Obstacle=[[0,0,1,Np], [4,4,0.01,1]]
 println(Np,"\n")
 
 Dm = Extraire_Dm(M, Obstacle, beta, k)

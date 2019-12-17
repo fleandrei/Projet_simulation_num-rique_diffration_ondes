@@ -182,6 +182,7 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 	N = floor(Int, N) #convert to int
 	println(N,"\n")
 
+
 	B = zeros(Complex{Float64}, N, 1)
 	for i = 1:M
 
@@ -189,18 +190,20 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 		dm = Dm[i][1]
 		ap = Obstacle[i][3]
 
+		println(size(dm))
+
 		Np = floor(Int, Np)
 		#dm = floor(Int, dm)
-		ap = floor(Int, ap)
+		#ap = floor(Int, ap)
 
 		
 		for m = -Np:Np
 			if(i > 1)
 				Np_prec = Obstacle[i-1][4]
-				Np_prec = floor(Int, Np_prec) #convert to int
 			else
 				Np_prec = 0 #arbritraire
 			end
+			Np_prec = floor(Int, Np_prec) #convert to int
 
 			temp   = m + Np + 1
 			idx    = temp + (i-1)*(2*Np_prec +1)
@@ -244,6 +247,9 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 	Np = Obstacle[p][4]
 	Nq = Obstacle[q][4]
 
+	Np = floor(Int, Np)
+	Nq = floor(Int, Nq)
+
 	if p == q
 		A = 1*Matrix(I,2*Np+1,2*Np+1)
 		#println(A,"\n")
@@ -257,6 +263,11 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 
 		xq = Obstacle[q][1]
 		yq = Obstacle[q][2]
+
+		xp = floor(Int, xp)
+		yp = floor(Int, yp)
+		xq = floor(Int, xq)
+		yq = floor(Int, yq)
 
 		b    = distance(xp, yp, xq, yq)
 		teta = angle_2p(xp, yp, xq, yq)
@@ -338,6 +349,8 @@ function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système
 	for i=1:M
 		
 		Np=Obstacle[i][4]
+		Np = floor(Int, Np)
+
 		push!(Cm[i],C[curseur+1:curseur+2*Np+1])
 		curseur=curseur+2*Np+1
 		
@@ -405,11 +418,16 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 		#somme_n=0
 
 		Nq = Obstacle[q][4]
+		Nq = floor(Int, Nq)
 		
 		x1 = Obstacle[q][1]
 		y1 = Obstacle[q][2]
 		x2 = x
 		y2 = y
+
+		x1 = floor(Int, x1)
+		y1 = floor(Int, y1)
+
 		b  = distance(x1,y1,x2,y2)
 		angle_2ppq = angle_2p(x1,y1,x2,y2)
 		Cq = Cm[q][1]
