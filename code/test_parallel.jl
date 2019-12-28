@@ -62,18 +62,30 @@ function Prod_Scalaire_Thread(X,Y)
 
 end
 
+function Prod_Scalaire_Sequentiel(X,Y)
+	Taille_vect=size(X,1)
+	Res=0
+	for i in 1:Taille_vect
+		Res= Res + X[i]*Y[i]
+	end
+	return Res
+end
 
 
 
+X=ones(50000000)
+Y=ones(50000000)
 println("Produit scalaire avec multithreads:\n")
-@time res=Prod_Scalaire_Thread(ones(50),ones(50)) #Le macro @time permet d'afficher le temps (ainsi que d'autres info) d'execution de l'instruct suivante
+@time res=Prod_Scalaire_Thread(X,Y) #Le macro @time permet d'afficher le temps (ainsi que d'autres info) d'execution de l'instruct suivante
 
 println(res)
 
-println("Produit scalaire avec multiprocess:\n")
-@time res=Prod_Scalaire_Distributed(ones(10000000),ones(10000000))
+println("\nProduit scalaire avec multiprocess:\n")
+@time res=Prod_Scalaire_Distributed(X,Y)
 println(res)
 
-
+println("\nProduit Scalaire en sequentiel: \n")
+@time res=Prod_Scalaire_Sequentiel(X,Y)
+println(res)
 
 #println(Sys.CPU_CORES)
