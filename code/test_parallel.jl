@@ -4,6 +4,7 @@ using SpecialFunctions
 using LinearAlgebra 
 using Base.Threads
 using Distributed
+using InteractiveUtils
 
 include("./polar.jl")
 include("./diffraction.jl")
@@ -41,26 +42,61 @@ function Prod_Scalaire_Thread(X,Y)
 	S=zeros(nbrThread)
 	#println(S)
 	#println(nbrThread)
+	
+	
 	@threads for i in 1:Taille_vect
-		IDThread=threadid()
-		#println(IDThread)
-		#println(S)
-		S[IDThread]=S[IDThread] + X[i]*Y[i]
+		#IDThread=threadid()
+		#println("S[$(threadid())]=$(S[threadid()])")
+		S[threadid()] += X[i]*Y[i]
 	end
+
+	
+	#@threads for i in 1:floor(Int, Taille_vect/4)
+		#IDThread=threadid()
+		#println("S[$(threadid())]=$(S[threadid()])")
+	#	S[threadid()] += X[i]*Y[i]
+	#end
+	
+	#@threads for i in floor(Int, Taille_vect/4):floor(Int, Taille_vect/2)
+	#	#IDThread=threadid()
+	#	#println("S[$(threadid())]=$(S[threadid()])")
+	#	S[threadid()] += X[i]*Y[i]
+	#end
+	
+	#@threads for i in floor(Int, Taille_vect/2):floor(Int, 3*Taille_vect/4)
+		#println("S[$(threadid())]=$(S[threadid()])")
+	#	S[threadid()] += X[i]*Y[i]
+	#end
+	
+	#@threads for i in floor(Int, 3*Taille_vect/4):Taille_vect
+		#println("S[$(threadid())]=$(S[threadid()])")
+	#	S[threadid()] += X[i]*Y[i]
+	#end  
 
 	sum=Atomic{Float64}(0)    #Créer un objet atomic de type Float64 et initialisé à 0
 	
 	@threads for j in 1:nbrThread
 		atomic_add!(sum,S[j])
-		println(sum)
+		#println(sum)
 		#IDThread=threadid()
 		#println("IDThread=",IDThread,", S[j]=",S[j])
 	end
 
 	return sum[] # Pour acceder à la valeur d'un type atomic, il faut lui ajouter des crochets [] à la fin 
 
-
 end
+
+
+#erreure:
+#function Prod_Scalaire_Thread_simple(X,Y)
+#	Taille_vect=size(X,1)
+#	Res=0
+#	@threads for i in 1:Taille_vect
+#		Res= Res + X[i]*Y[i]
+#	end
+#	return Res
+#end
+
 
 function Prod_Scalaire_Sequentiel(X,Y)
 	Taille_vect=size(X,1)
@@ -73,18 +109,21 @@ end
 
 
 
-X=ones(50000000)
-Y=ones(50000000)
+const X=ones(Float64, 5000000)
+const Y=ones(Float64, 5000000)
 println("Produit scalaire avec multithreads:\n")
 @time res=Prod_Scalaire_Thread(X,Y) #Le macro @time permet d'afficher le temps (ainsi que d'autres info) d'execution de l'instruct suivante
+@time res=Prod_Scalaire_Thread(X,Y) # Pour avoir un temps correct on lance 2 fois la fonct car la première fois, @time prend également en compte le temps de compilation. On ne regarde donc que le second temps donné
 
 println(res)
 
 println("\nProduit scalaire avec multiprocess:\n")
-@time res=Prod_Scalaire_Distributed(X,Y)
-println(res)
+#@time res=Prod_Scalaire_Distributed(X,Y)
+#@time res=Prod_Scalaire_Distributed(X,Y)
+#println(res)
 
 println("\nProduit Scalaire en sequentiel: \n")
+@time res=Prod_Scalaire_Sequentiel(X,Y)
 @time res=Prod_Scalaire_Sequentiel(X,Y)
 println(res)
 
