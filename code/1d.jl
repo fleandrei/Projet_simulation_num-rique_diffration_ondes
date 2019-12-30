@@ -59,7 +59,8 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 	
 	# Affichage graphique
 	
-	imshow(M, extent=(-3, 3, -3, 3))
+	imshow(transpose(M), extent=(-3, 3, -3, 3))
+	colorbar()
 	savefig("res1d.svg")
 end
 

@@ -285,14 +285,6 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 
 		
 
-		# for m =1:2*Np+1
-		# 	D = besselj(m,ap*k)/besselh(m, ap*k)
-		# 	for n= 1:2*Nq+1
-		# 			A[m,n] = D * Smn(m,n,b,teta,k)
-		# 	end
-		# end
-		# println(A,"\n b = ",b," teta = ",teta,"\n")
-
 		println("----------\n")
 		println(size(A),"\n")
 		println("----------\n")
@@ -313,7 +305,6 @@ function Calcule_A(M, Obstacle, k) #Calcule la matrice A du système "Ac=b"
 		A=hcat(A, Apq(1,j,k, Obstacle))
 	end
 	
-	
 	#println("\n")
 
 	for i = 2:M
@@ -329,7 +320,6 @@ function Calcule_A(M, Obstacle, k) #Calcule la matrice A du système "Ac=b"
 		A=vcat(A,Al)
 	
 	end
-
 	#println(A,"\n")
 
 	return A
@@ -361,7 +351,7 @@ function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système
 
 end
 
-function Boule_Proche(Obstacle,x, y,M)
+function Boule_Proche(Obstacle,x, y,M) # inutile
 	
 	MinDist=1000000
 	p=0
@@ -374,40 +364,6 @@ function Boule_Proche(Obstacle,x, y,M)
 	end
 	return p
 end
-
-
-# function CalculeUq(Obstacle, r, teta, k, p,Cm,M)
-	
-# 	Np=Obstacle[p][4]
-
-# 	somme_m=0
-
-# 	for m=-Np:Np
-# 		somme_q=0
-# 		for q=1:M
-# 			if q != p
-# 				Nq=Obstacle[q][4]
-# 				somme_n=0
-# 				x1=Obstacle[p][1]
-# 				y1=Obstacle[p][2]
-# 				x2=Obstacle[q][1]
-# 				y2=Obstacle[q][2]
-# 				bpq=distance(x1,y1,x2,y2)
-# 				angle_2ppq=angle_2p(x1,y1,x2,y2)
-# 				Cq=Cm[q][1]
-# 				for n=-Nq:Nq
-# 					somme_n=somme_n+ Smn(n,m,bpq,angle_2ppq, k)*Cq[n+Nq+1]
-# 				end
-# 				somme_q=somme_q + somme_n
-# 			end
-# 		end
-# 		somme_m= somme_m +	somme_q * Phi_Chap(m,r,teta,k)
-
-# 	end
-
-# 	return somme_m
-
-# end
 
 
 function CalculeUq(Obstacle, x,y, k,Cm,M)
@@ -441,26 +397,9 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 end
 
 
-# function Calcule_UDiff_MultiDisk(Obstacle,x,y,Cm,k,M)
-
-# 	#           m m Up = calculUp(r,teta, Cm[p][1], Np)
-# 	Uq = CalculeUq(Obstacle, x, y, k, Cm, M)
-# 	U  = Uq 
-# 	# println("Up = ",Up, " , Uq = ",Uq, ", U = ",U,"\n")
-# 	return U
-# end
 
 function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M,Beta)
 
-	# p     = Boule_Proche(Obstacle,x,y,M)
-	# Np    = Obstacle[p][4]
-	# xp    = Obstacle[p][1]
-	# yp    = Obstacle[p][2]
-
-	# r     = distance(xp, yp, x, y)
-	# teta  = angle_2p(xp, yp, x, y)
-
-	# Uinc  = calculUinc(r,teta, Dm[p][1], Np)
 	Uinc  = calculUinc_exact(x,y,Beta,k)
 
 	Udiff = CalculeUq(Obstacle, x, y, k, Cm, M)
@@ -475,7 +414,7 @@ function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M,Beta)
 end
 
 
-function Is_inDisk(x,y,Obstacle,M)
+function Is_inDisk(x,y,Obstacle,M) #inutile
 	for i = 1:M
 
 		if distance(x,y,Obstacle[i][1], Obstacle[i][2]) <= Obstacle[i][3]

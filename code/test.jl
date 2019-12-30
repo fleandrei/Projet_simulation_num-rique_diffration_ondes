@@ -11,13 +11,13 @@ include("./diffraction.jl")
 
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
-h              = lambda/30  #pas de la grille
-taille_espace  = 10 # taille total de la grille
+h              = lambda/60  #pas de la grille
+taille_espace  = 6 # taille total de la grille
 taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-M = 2
+M = 1
 	
 #####Function########	
 function Image_Mulit(obstacle,Cm,Dm, M,Beta)
@@ -44,7 +44,8 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	
 	# Affichage graphique
 	
-	imshow(transpose(Image), vmin=-2.5, vmax=2.5, extent=(-5, 5, -5, 5))
+	# imshow(transpose(Image), vmin=-2.5, vmax=2.5, extent=(-3, 3, -3, 3))
+	imshow(transpose(Image), extent=(-3, 3, -3, 3))
 	colorbar()
 	savefig("resMult.svg")
 end
@@ -66,6 +67,9 @@ B  = Calcule_B(M ,Obstacle, beta,k,Dm)
 A  = Calcule_A(M, Obstacle, k)
 C  = Calcule_C(A,B)
 
+println("----- C -----:\n")
+println(C)
+
 
 # println(Dm)
 #println(A)
@@ -74,7 +78,8 @@ C  = Calcule_C(A,B)
 
 
 Cm = Extraire_Cm(C,M,Obstacle)
-# println(Cm)
+println("----- Cm -----:\n")
+println(Cm)
 
 
 

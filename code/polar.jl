@@ -10,37 +10,37 @@ end
 
 # convertit les cartésiennes en polaires
 function conversion_polaire(x,y)
-	r=sqrt(x*x+y*y)
+	r = sqrt(x*x + y*y)
 	
 	# lambda = angle(x+y)
-	lambda = atan(x,y)
+	lambda = atan(y,x)
 
 	return(r,lambda)
 end
 
 # convertit les polaires en cartésiennes
 function conversion_cart(r,lambda)
-	x=r*cos(lambda)
-	y=r*sin(lambda)
+	x = r*cos(lambda)
+	y = r*sin(lambda)
 	return(y,x)
 end
 
 # convertit les cartésiens en coordonnées matricielles
 function coordonnees_from_cart(x,y,h,taille_espace)
-	i=convert(Int64,(x+taille_espace/2)/h)
-	j=convert(Int64,-(y-taille-espace/2)/h)
+	i = convert(Int64, (x+taille_espace/2)/h)
+	j = convert(Int64,-(y-taille-espace/2)/h)
 	return(i,j)
 end
 
 function distance(x1,y1,x2,y2)
-	d=sqrt((x2-x1)^(2)+(y2-y1)^(2))
+	d = sqrt((x2-x1)^(2) + (y2-y1)^(2))
 	return(d)
 end
 
 function angle_2p(x1,y1,x2,y2)
 	
-	x = x2 -x1
-	y = y2 -y1
+	x = x2 - x1
+	y = y2 - y1
 
 	
 	alpha = atan(y,x)
