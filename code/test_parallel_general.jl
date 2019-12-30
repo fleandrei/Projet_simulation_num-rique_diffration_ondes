@@ -5,6 +5,7 @@ using LinearAlgebra
 using Base.Threads
 using Distributed
 using InteractiveUtils
+#using ArrayFire
 
 include("./polar.jl")
 include("./diffraction.jl")

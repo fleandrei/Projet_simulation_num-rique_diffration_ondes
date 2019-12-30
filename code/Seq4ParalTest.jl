@@ -2,10 +2,9 @@ using Printf
 using PyPlot
 using SpecialFunctions
 using LinearAlgebra 
-using Base.Threads
 
 include("./polar.jl")
-include("./diffraction_thread.jl")
+include("./diffraction.jl")
 
 #using Polar
 #import Polar
@@ -47,7 +46,7 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	
 	imshow(transpose(Image), vmin=-2.5, vmax=2.5, extent=(-5, 5, -5, 5))
 	colorbar()
-	savefig("resMultThread.svg")
+	savefig("resMult.svg")
 end
 
 
@@ -63,8 +62,10 @@ Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,
 println(Np,"\n")
 
 Dm = Extraire_Dm(M, Obstacle, beta, k)
+println("/nTemps pour Calcule de B :\n")
 B  = @time Calcule_B(M ,Obstacle, beta,k,Dm)
 B  = @time Calcule_B(M ,Obstacle, beta,k,Dm)
+println("/nTemps pour Calcule de A :\n")
 A  = @time Calcule_A(M, Obstacle, k)
 A  = @time Calcule_A(M, Obstacle, k)
 C  = Calcule_C(A,B)
@@ -75,11 +76,12 @@ C  = Calcule_C(A,B)
 # println(B)
 # println(C)
 
-
-Cm = @time Extraire_Cm(C,M,Obstacle)
-Cm = @time Extraire_Cm(C,M,Obstacle)
+println("/nTemps pour Calcule de Cm :\n")
+@time Cm = Extraire_Cm(C,M,Obstacle)
+@time Cm = Extraire_Cm(C,M,Obstacle)
 # println(Cm)
 
 
 
-Image_Mulit(Obstacle,Cm,Dm,M,beta)
+@time Image_Mulit(Obstacle,Cm,Dm,M,beta)
+@time Image_Mulit(Obstacle,Cm,Dm,M,beta)

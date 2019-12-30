@@ -119,7 +119,7 @@ function CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a)
 	A  = A.*Hm
 	Cm = A\b
 
-	println(Cm)
+	#println(Cm)
 
 	return Cm
 end
@@ -145,8 +145,8 @@ function dmp(p, Obstacle, Beta,k) # Calcule les coeff Fourrier de l'onde inciden
 	
 	Np      = Obstacle[p][4]
 	Np      = floor(Int, Np) #convert to int
-	println(p)
-	println(Np)
+	#println(p)
+	#println(Np)
 	Dm      = zeros(Complex{Float64}, 2*Np +1, 1)
 	bp,teta = conversion_polaire(Obstacle[p][1], Obstacle[p][2])
 	temp    = exp(im*k * cos(Beta-teta) * bp)
@@ -180,7 +180,7 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 	end
 
 	N = floor(Int, N) #convert to int
-	println(N,"\n")
+	#println(N,"\n")
 
 
 	B = zeros(Complex{Float64}, N, 1)
@@ -190,7 +190,7 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 		dm = Dm[i][1]
 		ap = Obstacle[i][3]
 
-		println(size(dm))
+		#println(size(dm))
 
 		Np = floor(Int, Np)
 		#dm = floor(Int, dm)
@@ -207,7 +207,7 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 
 			temp   = m + Np + 1
 			idx    = temp + (i-1)*(2*Np_prec +1)
-			println(temp,",",idx,"\n")
+			#println(temp,",",idx,"\n")
 			B[idx] = -(besselj(m,ap*k)/besselh(m,k*ap))* dm[temp]
 		end
 	end
@@ -276,10 +276,10 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 		D = Matrix_D(Np,k,ap)
 		S = Matrix_S(Np,Nq,b,teta,Obstacle,k)
 
-		println("----------\n")
-		println(size(D),"\n")
-		println(size(transpose(S)),"\n")
-		println("----------\n")
+		#println("----------\n")
+		#println(size(D),"\n")
+		#println(size(transpose(S)),"\n")
+		#println("----------\n")
 
 		A = D * transpose(S)
 
@@ -293,9 +293,9 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 		# end
 		# println(A,"\n b = ",b," teta = ",teta,"\n")
 
-		println("----------\n")
-		println(size(A),"\n")
-		println("----------\n")
+		#println("----------\n")
+		#println(size(A),"\n")
+		#println("----------\n")
 
 		return A
 	end	
@@ -355,7 +355,7 @@ function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système
 		curseur=curseur+2*Np+1
 		
 	end
-	println(Cm)
+	#println(Cm)
 
 	return Cm
 

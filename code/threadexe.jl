@@ -2,9 +2,10 @@ using Printf
 using PyPlot
 using SpecialFunctions
 using LinearAlgebra 
+using Base.Threads
 
 include("./polar.jl")
-include("./diffraction.jl")
+include("./diffraction_thread.jl")
 
 #using Polar
 #import Polar
@@ -26,9 +27,9 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	Image = zeros(Float64, taille_matrice, taille_matrice)
 	
 	# Parcoure et remplissage de la matrice
-	for i = 1:taille_matrice
+	@threads for i = 1:taille_matrice
 
-		for j = 1:taille_matrice
+	    @threads for j = 1:taille_matrice
 
 			x,y      = coordonnees(i, j, h, taille_espace)
 			r,lambda = conversion_polaire(x, y)
@@ -46,7 +47,7 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	
 	imshow(transpose(Image), vmin=-2.5, vmax=2.5, extent=(-5, 5, -5, 5))
 	colorbar()
-	savefig("resMult.svg")
+	savefig("resMultThread.svg")
 end
 
 
@@ -55,15 +56,19 @@ end
 ##########CODE############
 
 Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3) +1)
+
+
+
+Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,Np], [3,3,1,Np],[1,4,1,Np], [3,1,1,Np], [3,4,1,Np]]
 println(Np,"\n")
 
-
-Obstacle=[[0,0,1,Np], [4,4,0.01,Np]]
-
-
 Dm = Extraire_Dm(M, Obstacle, beta, k)
-B  = Calcule_B(M ,Obstacle, beta,k,Dm)
-A  = Calcule_A(M, Obstacle, k)
+println("Temps calcule B: ")
+B  = @time Calcule_B(M ,Obstacle, beta,k,Dm)
+B  = @time Calcule_B(M ,Obstacle, beta,k,Dm)
+println("\nTemps calcule A: ")
+A  = @time Calcule_A(M, Obstacle, k)
+A  = @timev Calcule_A(M, Obstacle, k)
 C  = Calcule_C(A,B)
 
 
@@ -72,11 +77,12 @@ C  = Calcule_C(A,B)
 # println(B)
 # println(C)
 
-Cm = Extraire_Cm(C,M,Obstacle)
-
+println("\nTemps calcule C: ")
+Cm = @time Extraire_Cm(C,M,Obstacle)
+Cm = @time Extraire_Cm(C,M,Obstacle)
 # println(Cm)
 
 
-
-
-Image_Mulit(Obstacle,Cm,Dm,M,beta)
+println("\nTemps calcule Image: ")
+@time Image_Mulit(Obstacle,Cm,Dm,M,beta)
+@timev Image_Mulit(Obstacle,Cm,Dm,M,beta)
