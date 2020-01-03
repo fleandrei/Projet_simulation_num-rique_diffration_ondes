@@ -1,7 +1,7 @@
 from math import *
 import cmath as cm
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy import special
 
 ########### VARIABLE #############
@@ -85,8 +85,8 @@ def calculUinc(r,teta, Dm, Np):
 	return (U)
 
 
-def calculRCS(U):
-	return (10*log10(2*pi*abs(U)^2))
+def calculRCS(theta):
+	return (10*log10(2*pi*abs(theta)^2))
 
 
 
@@ -112,9 +112,11 @@ for m in range(-Np, Np+1):
 
 # declaration de la grille
 M = np.zeros((taille_grille, taille_grille))
+taille_mrcs = floor(2*pi*10)
+MRCS = np.zeros(taille_mrcs)
 
 
-# Parcoure et remplissage de la grille
+# Parcours et remplissage de la grille
 for i in range(taille_grille):
 	for j in range(taille_grille):
 		(x,y)=coordonnees(i,j,h,taille_espace)
@@ -124,7 +126,17 @@ for i in range(taille_grille):
 			M[i,j]=abs(calculUp(r, lbda, Cm, Np) + calculUinc(r, lbda, Dm, Np))
 			#print(" autre=",r)
 
+# Parcours et remplissage de MRCS
+for i in range(taille_mrcs):
+	MRCS[i] = calculRCS(i/10)
+
+
 # Affichage graphique
 
-plt.imshow(M, extent=(-3, 3, -3, 3))
-plt.savefig("res.svg")
+#plt.imshow(M, extent=(-3, 3, -3, 3))
+#plt.savefig("res.svg")
+
+# Affichage RCS
+
+plt.imshow(MRCS)
+plt.savefig("rcs.svg")
