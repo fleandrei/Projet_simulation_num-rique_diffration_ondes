@@ -35,7 +35,7 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 
 			if !Is_inDisk(x,y,Obstacle, M)
 
-				Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
+				@inbounds Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
 				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
 			end
 		end

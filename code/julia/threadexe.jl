@@ -27,16 +27,16 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	Image = zeros(Float64, taille_matrice, taille_matrice)
 	
 	# Parcoure et remplissage de la matrice
-	@threads for i = 1:taille_matrice
+	@inbounds @threads for i = 1:taille_matrice
 
-	    @threads for j = 1:taille_matrice
+	    @inbounds @threads for j = 1:taille_matrice
 
 			x,y      = coordonnees(i, j, h, taille_espace)
 			r,lambda = conversion_polaire(x, y)
 
 			if !Is_inDisk(x,y,Obstacle, M)
 
-				Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
+				@inbounds Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
 				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
 			end
 		end

@@ -44,12 +44,15 @@ function Prod_Scalaire_Thread(X,Y)
 	#println(S)
 	#println(nbrThread)
 	
-	
+	#@sync begin
+	#@async begin
 	@threads for i in 1:Taille_vect
 		#IDThread=threadid()
 		#println("S[$(threadid())]=$(S[threadid()])")
-		S[threadid()] += X[i]*Y[i]
+	    @inbounds S[threadid()] += X[i]*Y[i]
 	end
+	#end
+	#end
 
 	
 	#@threads for i in 1:floor(Int, Taille_vect/4)
@@ -103,15 +106,15 @@ function Prod_Scalaire_Sequentiel(X,Y)
 	Taille_vect=size(X,1)
 	Res=0
 	for i in 1:Taille_vect
-		Res= Res + X[i]*Y[i]
+		@inbounds Res= Res + X[i]*Y[i]
 	end
 	return Res
 end
 
 
 
-const X=ones(Float64, 5000000)
-const Y=ones(Float64, 5000000)
+const X=ones(Float64, 50000000)
+const Y=ones(Float64, 50000000)
 println("Produit scalaire avec multithreads:\n")
 @time res=Prod_Scalaire_Thread(X,Y) #Le macro @time permet d'afficher le temps (ainsi que d'autres info) d'execution de l'instruct suivante
 @time res=Prod_Scalaire_Thread(X,Y) # Pour avoir un temps correct on lance 2 fois la fonct car la première fois, @time prend également en compte le temps de compilation. On ne regarde donc que le second temps donné
