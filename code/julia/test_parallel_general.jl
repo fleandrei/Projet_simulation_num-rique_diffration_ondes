@@ -44,15 +44,12 @@ function Prod_Scalaire_Thread(X,Y)
 	#println(S)
 	#println(nbrThread)
 	
-	#@sync begin
-	#@async begin
+	
 	@threads for i in 1:Taille_vect
 		#IDThread=threadid()
 		#println("S[$(threadid())]=$(S[threadid()])")
-	    S[threadid()] += X[i]*Y[i]
+		S[threadid()] += X[i]*Y[i]
 	end
-	#end
-	#end
 
 	
 	#@threads for i in 1:floor(Int, Taille_vect/4)
