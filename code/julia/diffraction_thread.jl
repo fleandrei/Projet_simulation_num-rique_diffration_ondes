@@ -146,8 +146,8 @@ function dmp(p, Obstacle, Beta,k) # Calcule les coeff Fourrier de l'onde inciden
 	
 	Np      = Obstacle[p][4]
 	Np      = floor(Int, Np) #convert to int
-	println(p)
-	println(Np)
+	#println(p)
+	#println(Np)
 	Dm      = zeros(Complex{Float64}, 2*Np +1, 1)
 	bp,teta = conversion_polaire(Obstacle[p][1], Obstacle[p][2])
 	temp    = exp(im*k * cos(Beta-teta) * bp)
@@ -197,12 +197,11 @@ function Calcule_B(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac
 		#dm = floor(Int, dm)
 		#ap = floor(Int, ap)
 		if(i > 1)
-				Np_prec = Obstacle[i-1][4]
-			else
-				Np_prec = 0 #arbritraire
-			end
-			Np_prec = floor(Int, Np_prec) #convert to int
-		
+			Np_prec = Obstacle[i-1][4]
+		else
+			Np_prec = 0 #arbritraire
+		end
+		Np_prec = floor(Int, Np_prec) #convert to int
 		@threads for m = -Np:Np
 			temp   = m + Np + 1
 			idx    = temp + (i-1)*(2*Np_prec +1)
@@ -263,10 +262,10 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 		xq = Obstacle[q][1]
 		yq = Obstacle[q][2]
 
-		xp = floor(Int, xp)
-		yp = floor(Int, yp)
-		xq = floor(Int, xq)
-		yq = floor(Int, yq)
+		#xp = floor(Int, xp)
+		#yp = floor(Int, yp)
+		#xq = floor(Int, xq)
+		#yq = floor(Int, yq)
 
 		b    = distance(xp, yp, xq, yq)
 		teta = angle_2p(xp, yp, xq, yq)
@@ -423,8 +422,8 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 		x2 = x
 		y2 = y
 
-		x1 = floor(Int, x1)
-		y1 = floor(Int, y1)
+		#x1 = floor(Int, x1)
+		#y1 = floor(Int, y1)
 
 		b  = distance(x1,y1,x2,y2)
 		angle_2ppq = angle_2p(x1,y1,x2,y2)

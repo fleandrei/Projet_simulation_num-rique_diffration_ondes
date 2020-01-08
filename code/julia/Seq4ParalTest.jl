@@ -5,6 +5,8 @@ using LinearAlgebra
 
 include("./polar.jl")
 include("./diffraction.jl")
+include("./initboules.jl")
+
 
 #using Polar
 #import Polar
@@ -17,8 +19,9 @@ taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-M = 10
-	
+NbrBoulles = 130
+
+
 #####Function########	
 function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 
@@ -57,17 +60,18 @@ end
 Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1/3) +1)
 
 
+#Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,Np], [3,3,1,Np],[1,4,1,Np], [3,1,1,Np], [3,4,1,Np]]
+#println(Np,"\n")
 
-Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,Np], [3,3,1,Np],[1,4,1,Np], [3,1,1,Np], [3,4,1,Np]]
-println(Np,"\n")
+(Obstacle, )=initBoulesGrid(NbrBoulles, taille_espace, Np)
 
-Dm = Extraire_Dm(M, Obstacle, beta, k)
-println("/nTemps pour Calcule de B :\n")
-B  = @time Calcule_B(M ,Obstacle, beta,k,Dm)
-B  = @time Calcule_B(M ,Obstacle, beta,k,Dm)
-println("/nTemps pour Calcule de A :\n")
-A  = @time Calcule_A(M, Obstacle, k)
-A  = @time Calcule_A(M, Obstacle, k)
+Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
+println("\nTemps pour Calcule de B :\n")
+B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
+B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
+println("\nTemps pour Calcule de A :\n")
+A  = @time Calcule_A(NbrBoulles, Obstacle, k)
+A  = @time Calcule_A(NbrBoulles, Obstacle, k)
 C  = Calcule_C(A,B)
 
 
@@ -76,12 +80,12 @@ C  = Calcule_C(A,B)
 # println(B)
 # println(C)
 
-println("/nTemps pour Calcule de Cm :\n")
-@time Cm = Extraire_Cm(C,M,Obstacle)
-@time Cm = Extraire_Cm(C,M,Obstacle)
+println("\nTemps pour Calcule de Cm :\n")
+@time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
+@time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
 # println(Cm)
 
 
 
-@time Image_Mulit(Obstacle,Cm,Dm,M,beta)
-@time Image_Mulit(Obstacle,Cm,Dm,M,beta)
+@time Image_Mulit(Obstacle,Cm,Dm,NbrBoulles,beta)
+@time Image_Mulit(Obstacle,Cm,Dm,NbrBoulles,beta)

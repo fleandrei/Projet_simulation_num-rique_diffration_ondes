@@ -126,6 +126,11 @@ end
 
 
 function Phi(m,rp, teta,k)
+	if(k*rp==0)
+		println("Fonction Phi: erreure:  k*rp=0")
+		println(m)
+		println(rp)
+	end
 	return besselh(m, k*rp)*exp(im*m*teta)
 end
 
@@ -264,10 +269,10 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 		xq = Obstacle[q][1]
 		yq = Obstacle[q][2]
 
-		xp = floor(Int, xp)
-		yp = floor(Int, yp)
-		xq = floor(Int, xq)
-		yq = floor(Int, yq)
+		#xp = floor(Int, xp)
+		#yp = floor(Int, yp)
+		#xq = floor(Int, xq)
+		#yq = floor(Int, yq)
 
 		b    = distance(xp, yp, xq, yq)
 		teta = angle_2p(xp, yp, xq, yq)
@@ -413,7 +418,7 @@ end
 function CalculeUq(Obstacle, x,y, k,Cm,M)
 
 	somme_q = 0
-
+	
 	for q = 1:M
 		#somme_n=0
 
@@ -425,13 +430,21 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 		x2 = x
 		y2 = y
 
-		x1 = floor(Int, x1)
-		y1 = floor(Int, y1)
+		#x1 = floor(Int, x1)
+		#y1 = floor(Int, y1)
 
 		b  = distance(x1,y1,x2,y2)
 		angle_2ppq = angle_2p(x1,y1,x2,y2)
 		Cq = Cm[q][1]
 		#println(Cq,"\n")
+
+		if(b==0)
+			println("Boulle num:")
+			println(q)
+			println(x1)
+			println(x2)
+		end
+
 
 		somme_q = somme_q + calculUp(b, angle_2ppq, Cq, Nq)
 	end
