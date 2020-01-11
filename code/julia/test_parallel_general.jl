@@ -36,6 +36,8 @@ function Prod_Scalaire_Distributed(X,Y)
 
 end
 
+
+
 function Prod_Scalaire_Thread(X,Y)
 	nbrThread=nthreads()
 	

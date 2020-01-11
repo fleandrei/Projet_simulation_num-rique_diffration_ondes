@@ -1,8 +1,9 @@
 #module Polar
+using Distributed
 import Base.angle
 
 # a partir de l'indice d'une matrice donne les coordonnées cartésiennes
-function coordonnees(i,j,h,taille_espace) 
+@everywhere function coordonnees(i,j,h,taille_espace) 
 	x=i*h-taille_espace/2
 	y=-j*h+taille_espace/2
 	return(x,y)

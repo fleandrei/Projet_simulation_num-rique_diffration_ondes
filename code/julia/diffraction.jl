@@ -2,7 +2,7 @@ include("./polar.jl")
 using LinearAlgebra
 
 # Calcule l'onde diffractée complexe U
-function calculUp(r,teta, Cm, Np)
+function calculUp(r,teta, Cm, Np,k)
 
 	U = 0.0
 
@@ -446,7 +446,7 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 		end
 
 
-		somme_q = somme_q + calculUp(b, angle_2ppq, Cq, Nq)
+		somme_q = somme_q + calculUp(b, angle_2ppq, Cq, Nq, k)
 	end
 
 	return somme_q
