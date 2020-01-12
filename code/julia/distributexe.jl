@@ -12,13 +12,14 @@ using Distributed
 include("./initboules.jl")
 
 # Le macro @everywhere sert à dire que l'élément qui suit sera chargé dans tous les processus. Sans cela, seul le processus appelant les aurra chargé
-# Pour lancer le code: julia distributexe.jl -p "nombre de processus"
+# Pour lancer le code: julia distributexe.jl -p "nombre de processus"    Dans notre Cas on a prit 4 prcessus
 
 #using Polar
 #import Polar
 
 
 addprocs(3) #On ajoute 3 ouvriers. Avec le processus courrant, cela fait 4 processus en tout. 
+Granular=7 # Granularité
 
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
@@ -28,7 +29,7 @@ taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-NbrBoulles = 130
+NbrBoulles = 100
 	
 #####Function########
 @everywhere function Image_Calcul_Ligne(Idx_Ligne, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
@@ -50,8 +51,28 @@ NbrBoulles = 130
 
 end
 
+@everywhere function Image_Calcul_Portion(Idx, nbr_ligne, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
 
-function Image_Mulit(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Beta, h)
+	res= zeros(Float64, nbr_ligne, taille_matrice)
+	for i=Idx:(Idx+nbr_ligne-1)
+		for j=1:taille_matrice
+			x,y = coordonnees(i, j, h, taille_espace)
+			r, lambda = conversion_polaire(x, y)
+
+			if !Is_inDisk(x,y,Obstacle, M)
+				res[i-Idx+1,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M, Beta)
+				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
+			end
+
+		end
+	end
+
+	return res
+
+end
+
+
+function Image_Mulit(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Beta, h, Granular)
 
 	np = nprocs() #Nombre de processus
 	#println(np)
@@ -60,20 +81,33 @@ function Image_Mulit(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Beta, h
 	Image = zeros(Float64, taille_matrice, taille_matrice)
 
 	i = 1
-    nextidx() = (idx = i; i += 1; idx)
-	
-
+    #nextidx() = (idx = i; i += 1; idx) #Granularité: A chaque fois qu'un ouvrier demande du travaille on lui passe 1 ligne 
+	nextidx() = (idx = i; i+=Granular; idx)
 	@sync begin # See below the discussion about all this part.
         for p = 1:np
         	if p != myid() || np == 1 #Seul les 3 processus ouvrier vont vraiment travailler
         		@async begin
+        			#println(p)
                     while true
                         idx = nextidx()
                         if idx > taille_matrice
                             break
                         end
-                        temp = remotecall(Image_Calcul_Ligne, p, idx , Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h )
-                    	Image[idx,:]=fetch(temp)
+                        #temp = remotecall(Image_Calcul_Ligne, p, idx , Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h )
+
+                        longueur=Granular
+
+                        if taille_matrice - idx < Granular
+                        	longueur=taille_matrice -idx +1
+                        end
+                        #println(p)
+                        #println(idx)
+                        temp = remotecall(Image_Calcul_Portion, p, idx, longueur, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
+                        #println(size(fetch(temp)))
+                        Image[idx:(idx+longueur-1),:]=fetch(temp)
+                        
+
+
                     end
                 end
 
@@ -126,6 +160,6 @@ Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
 @everywhere using LinearAlgebra 
 
 println("\nTemps calcule Image: ")
-@time Image_Mulit(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h)
+@time Image_Mulit(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular)
 #@timev Image_Mulit(Obstacle,Cm,Dm,NbrBoulles,beta)
-@time Image_Mulit(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h)
+@time Image_Mulit(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular)

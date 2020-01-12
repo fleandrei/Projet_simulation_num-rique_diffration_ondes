@@ -19,7 +19,7 @@ taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-NbrBoulles = 130
+NbrBoulles = 30
 
 
 #####Function########	
