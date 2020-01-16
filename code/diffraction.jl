@@ -218,49 +218,6 @@ function Calcule_B(M, Obstacle, Beta,k,Dm)
 	return B
 end
 
-function Calcule_B_naive(M, Obstacle, Beta,k,Dm) #Calcule le vecteur b du système "Ac=b"
-#a changer
-	N = 0 
-	for i = 1:M
-		N = N + 2*Obstacle[i][4] +1
-	end
-
-	N = floor(Int, N) #convert to int
-	println(N,"\n")
-
-
-	B = zeros(Complex{Float64}, N, 1)
-	for i = 1:M
-
-		Np = Obstacle[i][4]
-		dm = Dm[i][1]
-		ap = Obstacle[i][3]
-
-		println(size(dm))
-
-		Np = floor(Int, Np)
-		#dm = floor(Int, dm)
-		#ap = floor(Int, ap)
-
-		
-		for m = -Np:Np
-			if(i > 1)
-				Np_prec = Obstacle[i-1][4]
-			else
-				Np_prec = 0 #arbritraire
-			end
-			Np_prec = floor(Int, Np_prec) #convert to int
-
-			temp   = m + Np + 1
-			idx    = temp + (i-1)*(2*Np_prec +1)
-			# println(temp,",",idx,"\n")
-			B[idx] = -(besselj(m,ap*k)/hankelh1(m,k*ap))* dm[temp]
-		end
-	end
-
-	return B
-end
-
 
 function Matrix_S(Np,Nq,b,teta,k)
 	
@@ -404,20 +361,6 @@ function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système
 
 end
 
-# function Boule_Proche(Obstacle,x, y,M) # inutile
-	
-# 	MinDist=1000000
-# 	p=0
-# 	for i=1:M
-# 		Dist=distance(x,y,Obstacle[i][1], Obstacle[i][2])
-# 		if Dist<MinDist
-# 			MinDist=Dist
-# 			p=i
-# 		end
-# 	end
-# 	return p
-# end
-
 
 function CalculeUq(Obstacle, x,y, k,Cm,M)
 
@@ -475,3 +418,108 @@ function Is_inDisk(x,y,Obstacle,M)
 
 	return false
 end
+
+
+
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------------
+
+#fonctions liées aux test et visualisation et non à la resolution mathematiques du probleme
+
+#------------------------------------------------------------------------------------------------
+
+
+
+# --------- genere boule aleatoirement----------
+function initBoulesAlea(nb_boules_min,nb_boules_max,xmin,xmax,ymin,ymax,rmin,rmax) # Crée des boulles dont le nombre, la position et le rayon sont aléatoires
+	# nb_boules_min = 2
+	# nb_boules_max = 20
+	nb_boules = rand(nb_boules_min:nb_boules_max)
+	boules = [[] for p=1:nb_boules]
+
+	# breaking = 0
+
+	# xmin = 0
+	# xmax = 10
+	# ymin = 0
+	# ymax = 10
+	# rmin = 0.5
+	# rmax = 3
+
+	i = 0
+	iter = 0
+	while (i < nb_boules && iter < 10000)
+		breaking = 0
+		r = rand()*(rmax-rmin)+rmin
+		xxmin = xmin + r
+		xxmax = xmax - r
+		x = rand()*(xxmax-xxmin)+xxmin
+		yymin = ymin + r
+		yymax = ymax - r
+		y = rand()*(yymax-yymin)+yymin
+		if (i != 0)
+			for k = 1:i
+				if (sqrt((boules[k][1] - x)^2 + (boules[k][2] - y)^2) < r + boules[k][3] && breaking == 0)
+					breaking = 1
+				end
+			end
+		end
+		if (breaking == 0)
+			Np = floor(Int64, k*r + cbrt( (1/(2*sqrt(2))) *log(2*sqrt(2)*pi*r*k*e) )^(2) * cbrt(k*r) + 1)
+			push!(boules[i+1],x,y,r,Np)
+
+			i = i+1
+		end
+		iter += 1 
+	end
+
+	#println(boules)
+	return (boules, nb_boules)
+end
+
+
+
+
+#------------ Calcule et sauve image ------------
+function Image_Mulit(obstacle,Cm,Dm, M,Beta)
+
+# declaration de la matrice
+	Image = zeros(Float64, taille_matrice, taille_matrice)
+	
+	# Parcoure et remplissage de la matrice
+	for i = 1:taille_matrice
+
+		for j = 1:taille_matrice
+
+			x,y      = coordonnees(i, j, h, taille_espace)
+			r,lambda = conversion_polaire(x, y)
+
+			if !Is_inDisk(x,y,Obstacle, M)
+
+				Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
+				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
+			end
+		end
+		println("Image [",i,"]","\n")
+	end
+	
+	# Affichage graphique
+
+	scale_min = - taille_espace/2
+	scale_max =   taille_espace/2
+	
+	# imshow(transpose(Image), vmin=0.0, vmax=2.0, extent=(scale_min, scale_max, scale_min, scale_max))
+	imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
+	colorbar()
+	savefig("resMult.svg")
+end
+
+
+
+
+
