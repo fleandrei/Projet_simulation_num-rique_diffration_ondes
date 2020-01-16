@@ -11,15 +11,22 @@ using Distributed
 @everywhere include("./diffraction.jl")
 include("./initboules.jl")
 
+#######INFO GENERALES
 # Le macro @everywhere sert à dire que l'élément qui suit sera chargé dans tous les processus. Sans cela, seul le processus appelant les aurra chargé
+
+# Le macro @time permet d'afficher le temps (ainsi que d'autres info) d'execution de l'instruct devant laquelle il est placé.
+# Pour avoir un temps correct on lance 2 fois la fonct car la première fois, @time prend également en compte le temps de compilation. On ne regarde donc que le second temps donné
+
 # Pour lancer le code: julia distributexe.jl -p "nombre de processus"    Dans notre Cas on a prit 4 prcessus
+# Pour lancer le code sur des machines distantes: julia distributexe.jl --machinefile
+#######
 
 #using Polar
 #import Polar
 
 
 addprocs(3) #On ajoute 3 ouvriers. Avec le processus courrant, cela fait 4 processus en tout. 
-Granular=7 # Granularité
+Granular=7 # Granularité i.e. nombre de lignes qui vont être attribué aux processus ui va demander du travail
 
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
@@ -32,6 +39,7 @@ e    = 10^(-12)
 NbrBoulles = 100
 	
 #####Function########
+# Calcule la ligne num 'Idx'_Ligne de l'image.
 @everywhere function Image_Calcul_Ligne(Idx_Ligne, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
 	#println("test")
 	#println(Idx_Ligne)
@@ -51,6 +59,8 @@ NbrBoulles = 100
 
 end
 
+
+# Calcule une portion de l'image: On calcule 'nbr_ligne' lignes à partir de la ligne d'indice 'Idx'
 @everywhere function Image_Calcul_Portion(Idx, nbr_ligne, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
 
 	res= zeros(Float64, nbr_ligne, taille_matrice)
@@ -82,38 +92,48 @@ function Image_Mulit(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Beta, h
 
 	i = 1
     #nextidx() = (idx = i; i += 1; idx) #Granularité: A chaque fois qu'un ouvrier demande du travaille on lui passe 1 ligne 
-	nextidx() = (idx = i; i+=Granular; idx)
-	@sync begin # See below the discussion about all this part.
-        for p = 1:np
-        	if p != myid() || np == 1 #Seul les 3 processus ouvrier vont vraiment travailler
-        		@async begin
+	
+	nextidx() = (idx = i; i+=Granular; idx) #Fonction commune à toutes les tasks lancées dans Image_Mulit. Renvoie l'indice de la prochaine ligne à calculer. 
+
+	@sync begin # On entre dans une Section synchrone: Permet de s'assurer que toutes les tasks sont terminées avant de sortir de cette zone
+
+        for p = 1:np # On parcourt les processus 
+
+        	if p != myid() || np == 1 #Seul les 3 processus ouvrier vont vraiment travailler (sauf si il n'y a qu'un seul processus): Modèle Patron/Ouvrier
+
+        		@async begin # On rentre dans une Section Asynchrone. Le code contenu dans cette zone correspond à une Task. On lance ainsi 'np' task différentes de manière asynchrones MAIS pas dans des 'np' processus différent. Toutes les task s'exécutent sur le processus principal i.e. le processus p=1 
+
         			#println(p)
                     while true
-                        idx = nextidx()
-                        if idx > taille_matrice
+                        idx = nextidx() # Indice de la prochaine ligne à calculer
+                        if idx > taille_matrice # Si il n'y a plus rien à calculer, on sort de la boucle (et la task est terminé)
                             break
                         end
+
                         #temp = remotecall(Image_Calcul_Ligne, p, idx , Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h )
 
-                        longueur=Granular
+                        longueur=Granular # Granularité: nombre de lignes que l'on va confier au processus lorsqu'il viendra demander du travail
 
-                        if taille_matrice - idx < Granular
+                        if taille_matrice - idx < Granular  # Si il reste moins de 'Granular' lignes à calculer
                         	longueur=taille_matrice -idx +1
                         end
+
                         #println(p)
                         #println(idx)
-                        temp = remotecall(Image_Calcul_Portion, p, idx, longueur, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
+
+                        temp = remotecall(Image_Calcul_Portion, p, idx, longueur, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)  # On appelle le processus 'p' et on lui demande d'executer la fonction Image_Calcul_Portion avec les arguments (idx, longueur, Obstacle, taille_matrice, taille_espace, Cm, Dm, k, M, Beta, h)
+
                         #println(size(fetch(temp)))
-                        Image[idx:(idx+longueur-1),:]=fetch(temp)
+                        Image[idx:(idx+longueur-1),:]=fetch(temp) # le résultat renvoyé par remotecall n'est pas directement exploitable c'est pourquoi on utilise fetch()
                         
 
 
                     end
-                end
+                end # Sortie de @async
 
         	end
         end
-    end
+    end # Sortie de @sync: Attend que toutes les taches soient finit avant de sortir
 
 	# Affichage graphique
 	
@@ -132,7 +152,7 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 
 #Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,Np], [3,3,1,Np],[1,4,1,Np], [3,1,1,Np], [3,4,1,Np]]
 #println(Np,"\n")
-(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace, Np )
+(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace, Np ) 
 #println(Obstacle)	
 Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
 println("Temps calcule B: ")

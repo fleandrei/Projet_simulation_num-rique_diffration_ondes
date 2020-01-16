@@ -14,7 +14,7 @@ include("./diffraction.jl")
 
 #Pour fixer le nombre de threads, il faut faire "export JULIA_NUM_THREADS=4" dans le terminal
 #Pour fixer le nombre de processus locaux il faut faire: "julia nom_program -p n" où n est le nombre de process
-#Pour fixer les processus sur des machines distantes 
+#Pour fixer les processus sur des machines distantes "julia nom_program --machinefile hostfile"
  
 addprocs(3) # Ajoute 3 processus en plus du processus principal qui lance julia. On a donc en tout 4 processus
 println("indices des processus:\n")
