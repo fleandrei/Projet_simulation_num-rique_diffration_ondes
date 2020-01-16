@@ -1,8 +1,9 @@
 from math import *
 import cmath as cm
 import numpy as np
-import matplotlib.pyplot as plt
+import scipy as sp
 from scipy import special
+import matplotlib.pyplot as plt
 
 ########### VARIABLE #############
 k = 2*pi
@@ -87,7 +88,7 @@ def calculUp(r,teta, Cm, Np):
 	#N=length(Cm)
 	U=0.0
 	for m in range(-Np, Np+1):
-		U += Cm[m+Np] * special.hankel1(m, k*r) * cm.exp(1j*m*teta)
+		U += Cm[m+Np] * sp.special.hankel1(m, k*r) * cm.exp(1j*m*teta)
 
 	return (U)
 
@@ -97,7 +98,7 @@ def calculUinc(r,teta, Dm, Np):
 	#N=length(Cm)
 	U=0.0
 	for m in range(-Np, Np+1):
-		U += Dm[m+Np] * special.jv(m, k*r) * cm.exp(1j*m*teta)
+		U += Dm[m+Np] * sp.special.jv(m, k*r) * cm.exp(1j*m*teta)
 
 	return (U)
 
@@ -125,8 +126,8 @@ def CDH(bp,alphap,alpha,Np, k): #Calcule Cm: coef Fourrier onde réfléchie, Dm:
 
 	for m in range(-Np, Np+1):
 		Dm[m+Np]=temp*cm.exp(1j*(pi*0.5 - alpha)*m)
-		Hm[m+Np]=special.hankel1(m,a*k)
-		Cm[m+Np]=special.jv(m,a*k) * Dm[m+Np] / Hm[m+Np]
+		Hm[m+Np]=sp.special.hankel1(m,a*k)
+		Cm[m+Np]=sp.special.jv(m,a*k) * Dm[m+Np] / Hm[m+Np]
 
 	return (Cm,Dm,Hm)
 
@@ -163,7 +164,7 @@ def Calcule_b(bp,alphap,alpha,Np, k, a):
 
 	for m in range(-Np, Np+1):
 
-		b[m + Np] = - special.jv(m, temp) * Dm[m + Np]
+		b[m + Np] = - sp.special.jv(m, temp) * Dm[m + Np]
 	
 
 	return b
@@ -190,12 +191,12 @@ def CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a):
 
 
 def Phi(m,rp, teta,k):
-	return special.hankel1(m, k*rp)*cm.exp(1j*m*teta)
+	return sp.special.hankel1(m, k*rp)*cm.exp(1j*m*teta)
 
 
 
 def Phi_Chap(m,rp,teta,k):
-	return special.jv(m, rp*k)*cm.exp(1j*m*teta)
+	return sp.special.jv(m, rp*k)*cm.exp(1j*m*teta)
 
 
 
@@ -243,7 +244,7 @@ def Calcule_B(M, Obstacle, Beta,k,Dm): #Calcule le vecteur b du système "Ac=b"
 	
 
 	N = floor(N) #convert to int
-	print(N)
+	print("B : (" + str(N) + ", 1)")
 
 
 	B = np.zeros((N,1), dtype=np.complex_)
@@ -271,7 +272,7 @@ def Calcule_B(M, Obstacle, Beta,k,Dm): #Calcule le vecteur b du système "Ac=b"
 			temp   = m + Np
 			idx    = temp + i*(2*Np_prec +1)
 			print(str(temp) + "," + str(idx))
-			B[idx] = -(special.jv(m,ap*k)/special.hankel1(m,k*ap)) * dm[temp]
+			B[idx] = -(sp.special.jv(m,ap*k)/sp.special.hankel1(m,k*ap)) * dm[temp]
 		
 	
 
@@ -296,7 +297,7 @@ def Matrix_D(Np,k,ap):
 
 	#N = min(Np,Nq)
 	for m in range(2*Np+1):
-		D[m,m] = special.jv(m,ap*k)/special.hankel1(m, ap*k)
+		D[m,m] = sp.special.jv(m,ap*k)/sp.special.hankel1(m, ap*k)
 	
 
 	return D
@@ -357,7 +358,7 @@ def Apq(p,q,k, Obstacle): #Calcule la sous-matrice d'indices p,q de la matrice A
 		# println(A,"\n b = ",b," teta = ",teta,"\n")
 
 		print("----------")
-		print(A.shape)
+		print("A shape : " + str(A.shape))
 		print("----------")
 
 		return A
@@ -373,7 +374,7 @@ def Calcule_A(M, Obstacle, k): #Calcule la matrice A du système "Ac=b"
 
 	for j in range(1, M):
 
-		A=np.concatenate((A, Apq(1,j,k, Obstacle)), axis=1)
+		A=np.concatenate((A, Apq(1,j,k, Obstacle)), axis=0)
 	
 	
 	
@@ -384,14 +385,14 @@ def Calcule_A(M, Obstacle, k): #Calcule la matrice A du système "Ac=b"
 		Al=Apq(i,1,k, Obstacle) #Correspond à la première boucle de for j=1
 		for j in range(1, M):
 
-			Al=np.concatenate((Al, Apq(i,j,k, Obstacle)), axis=1)
+			Al=np.concatenate((Al, Apq(i,j,k, Obstacle)), axis=0)
 			
 		
 		#println(Al)
 		#println("\n")
-		A=np.concatenate((A,Al), axis=0)
+		A=np.concatenate((A,Al), axis=1)
 	
-	
+	print("A : (" + str(len(A)) + ", " + str(len(A[0])) + ")")
 
 	#println(A,"\n")
 
@@ -400,7 +401,7 @@ def Calcule_A(M, Obstacle, k): #Calcule la matrice A du système "Ac=b"
 
 
 def Calcule_C(A,b): #Calcule le vecteur c du système: "Ac=b".  Il s'agit du vecteur des coeff de Fourrier des ondes diffractées
-	return np.linalg.solve(A, b)
+	return sp.linalg.solve(A, b)
 
 
 
