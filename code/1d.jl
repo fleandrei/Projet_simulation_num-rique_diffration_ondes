@@ -15,14 +15,14 @@ k = 2*pi
 lambda = 2*pi/k # longueur d'onde
 h = lambda/60  #pas de la grille
 a = 1 # rayon de l'obstacle
-taille_espace=6 # taille total de la grille
+taille_espace=10 # taille total de la grille
 taille_matrice=convert(Int64, taille_espace*1/h)
 
 
 alpha=pi #Angle de l'onde incidente
 alphap=0 #Angle de l'obstacle
 bp=0
-rp=1
+rp=3
 e=10^(-12)
 
 
@@ -59,7 +59,7 @@ function dim1(h_, a_, alpha_, alphap_, bp_, rp_)
 	
 	# Affichage graphique
 	
-	imshow(transpose(M), extent=(-3, 3, -3, 3))
+	imshow(transpose(M), extent=(-5, 5, -5, 5))
 	colorbar()
 	savefig("res1d.svg")
 end

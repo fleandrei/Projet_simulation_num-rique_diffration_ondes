@@ -13,7 +13,7 @@ function conversion_polaire(x,y)
 	r = sqrt(x*x + y*y)
 	
 	# lambda = angle(x+y)
-	lambda = atan(y,x)
+	lambda = atan(y,x) 
 
 	return(r,lambda)
 end
@@ -45,7 +45,7 @@ function angle_2p(x1,y1,x2,y2)
 	
 	alpha = atan(y,x)
 	# alpha = angle(x+y) 
-	return(alpha)
+	return alpha
 end
 
 	#export coordonnees
