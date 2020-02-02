@@ -61,7 +61,7 @@ function initBoulesAlea(Np) # Crée des boulles dont le nombre, la position et l
 end
 
 
-function initBoulesGrid(NbrBoules, TailleMat, Np) # Crée NbrBoules boulles allignées et espacé à interval constant
+function initBoulesGrid(NbrBoules, TailleEsp) # Crée NbrBoules boulles allignées et espacé à interval constant
 	boules = [[] for i=1:NbrBoules]
 	nbrBoule_cote=floor(Int64, sqrt(NbrBoules))  #Nombre de boules le long de chaque dimenssion de la matrice
 	#nbrBoule_cote=nbrBoule_cote + floor(Int64, (NbrBoules - nbrBoule_cote*nbrBoule_cote + 1)/2) 
@@ -70,15 +70,17 @@ function initBoulesGrid(NbrBoules, TailleMat, Np) # Crée NbrBoules boulles alli
 		nbrBoule_cote=nbrBoule_cote + 1
 	end
 	
-	espace_Boule=TailleMat/nbrBoule_cote    # Longueur nécéssaire pour représenter une boule (la boule en elle même plus son espace vital) sur la matrice.
+	espace_Boule=TailleEsp/nbrBoule_cote    # Longueur nécéssaire pour représenter une boule (la boule en elle même plus son espace vital) sur la matrice.
 	espace_Vital=espace_Boule*0.1   # L'espace vital de chaque boulle correspond à 10% de l'espace_Boule
 	Rayon= (espace_Boule-espace_Vital)/2
+
+	Np=floor(Int64, k*Rayon + cbrt( (1/(2*sqrt(2))) *log(2*sqrt(2)*pi*Rayon*k*e) )^(2) * cbrt(k*Rayon) + 1)
 
 	count=0
 	for i in 1:nbrBoule_cote #Parcourt les lignes de la matrice
 		j=0
 		while (count<NbrBoules && j<nbrBoule_cote) #Parcourt les colonnes de la matrice
-			push!(boules[count+1], (i-1)*espace_Boule + espace_Boule/2 - TailleMat/2, j*espace_Boule + espace_Boule/2 - TailleMat/2, Rayon, Np)
+			push!(boules[count+1], (i-1)*espace_Boule + espace_Boule/2 - TailleEsp/2, j*espace_Boule + espace_Boule/2 - TailleEsp/2, Rayon, Np)
 			j=j+1
 			count =count+1
 		end

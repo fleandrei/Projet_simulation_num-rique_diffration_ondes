@@ -45,7 +45,7 @@ println("--------------------------------------------------\n")
 boules_min = 10
 boules_max = 10
 xmin = - taille_espace/2
-xmax =   taille_espace/2
+xmax =   taille_espace/2	
 ymin = xmin
 ymax = xmax
 rmin = 0.1
