@@ -28,6 +28,7 @@ include("./initboules.jl")
 addprocs(3) #On ajoute 3 ouvriers. Avec le processus courrant, cela fait 4 processus en tout. 
 Granular_Image=9 # Granularité pour le calcul de l'image i.e. nombre de lignes qui vont être attribué aux processus qui va demander du travail
 Granular_A=2 # Granularité pour le calcul de la matrice *a 
+Parallel=false #Bool égal true si on utilise le parallelisme
 
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
@@ -182,35 +183,38 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 
  
 #println(Obstacle)	
-Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
-println("Temps calcule B: ")
-B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
-#B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
-println("\nTemps calcule A: ")
-@everywhere include("./diffraction_para.jl")
-@everywhere using SpecialFunctions
-@everywhere using LinearAlgebra
-A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
-#A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k)
-println("Taille A=$(size(A)),  B=$(length(B)) \n")
-C  = Calcule_C(A,B)
+
+if(Parallel)
+	Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
+	println("Temps calcule B: ")
+	B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
+	#B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
+	println("\nTemps calcule A: ")
+	@everywhere include("./diffraction_para.jl")
+	@everywhere using SpecialFunctions
+	@everywhere using LinearAlgebra
+	A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
+	#A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k)
+	println("Taille A=$(size(A)),  B=$(length(B)) \n")
+	C  = Calcule_C(A,B)
 
 
-# println(Dm)
-#println(A)
-# println(B)
-# println(C)
+	# println(Dm)
+	#println(A)
+	# println(B)
+	# println(C)
 
-println("\nTemps calcule C: ")
-Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
-#Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
-# println(Cm)
+	println("\nTemps calcule C: ")
+	Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
+	#Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
+	# println(Cm)
 
-@everywhere include("./polar.jl")
-@everywhere include("./diffraction_para.jl") #On réecrit les @everywhere avant d'appeler la fonction Image_Multi_Proc ... 
-@everywhere using SpecialFunctions # ... sans quoi les autre process ne reconnaissent pas les fonctions ...					@everywhere using LinearAlgebra    #... (coordonnees(),Is_inDisk(), besselh...)
+	@everywhere include("./polar.jl")
+	@everywhere include("./diffraction_para.jl") #On réecrit les @everywhere avant d'appeler la fonction Image_Multi_Proc ... 
+	@everywhere using SpecialFunctions # ... sans quoi les autre process ne reconnaissent pas les fonctions ...					@everywhere using LinearAlgebra    #... (coordonnees(),Is_inDisk(), besselh...)
 
-println("\nTemps calcule Image: ")
-#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
-#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
-@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+	println("\nTemps calcule Image: ")
+	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
+	@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+end
