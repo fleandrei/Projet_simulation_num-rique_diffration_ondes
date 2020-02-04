@@ -235,7 +235,7 @@ else
 	@everywhere include("./diffraction_para.jl")
 	@everywhere using SpecialFunctions
 	@everywhere using LinearAlgebra
-	A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
+	A  = @time Calcule_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
 	#A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k)
 	println("Taille A=$(size(A)),  B=$(length(B)) \n")
 	C  = Calcule_C(A,B)
@@ -258,7 +258,7 @@ else
 	println("\nTemps calcule Image: ")
 	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
 	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
-	@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+	@time Image_Mulit(Obstacle, Cm,Dm, NbrBoulles,beta)
 
 
 end
