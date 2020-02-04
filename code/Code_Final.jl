@@ -182,7 +182,16 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 #println(Np,"\n")
 
  
-#println(Obstacle)	
+#println(Obstacle)
+
+println("Si vous voulez utilisé le parallelisme appuyez sur 'P',\n Sinon appuyez sur 'S' \n")
+P=readline()
+
+if(P=="P")
+	Parallel=true
+else
+	Parallel=false
+end
 
 if(Parallel)
 	Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
@@ -217,4 +226,39 @@ if(Parallel)
 	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
 	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
 	@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+else
+	Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
+	println("Temps calcule B: ")
+	B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
+	#B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
+	println("\nTemps calcule A: ")
+	@everywhere include("./diffraction_para.jl")
+	@everywhere using SpecialFunctions
+	@everywhere using LinearAlgebra
+	A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
+	#A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k)
+	println("Taille A=$(size(A)),  B=$(length(B)) \n")
+	C  = Calcule_C(A,B)
+
+
+	# println(Dm)
+	#println(A)
+	# println(B)
+	# println(C)
+
+	println("\nTemps calcule C: ")
+	Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
+	#Cm = @time Extraire_Cm(C,NbrBoulles,Obstacle)
+	# println(Cm)
+
+	@everywhere include("./polar.jl")
+	@everywhere include("./diffraction_para.jl") #On réecrit les @everywhere avant d'appeler la fonction Image_Multi_Proc ... 
+	@everywhere using SpecialFunctions # ... sans quoi les autre process ne reconnaissent pas les fonctions ...					@everywhere using LinearAlgebra    #... (coordonnees(),Is_inDisk(), besselh...)
+
+	println("\nTemps calcule Image: ")
+	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
+	@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+
+
 end
