@@ -28,7 +28,11 @@ include("./initboules.jl")
 addprocs(3) #On ajoute 3 ouvriers. Avec le processus courrant, cela fait 4 processus en tout. 
 Granular_Image=9 # Granularité pour le calcul de l'image i.e. nombre de lignes qui vont être attribué aux processus qui va demander du travail
 Granular_A=2 # Granularité pour le calcul de la matrice *a 
-Parallel=false #Bool égal true si on utilise le parallelisme
+println("On a $(nprocs()) processus\n")
+
+
+
+
 
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
@@ -168,9 +172,28 @@ function Image_Multi_Proc(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Be
 	imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("resMultProc.svg")
+	return Image
 end
 
+function Gener_Sequence(Matrice_Image_Spatial,Pas_Temps, Temps_Final)
+	Nbr_Image=0
+	Image=zeros(Float64, taille_matrice, taille_matrice)
+	scale_min = 0
+	scale_max = taille_espace
 
+	for t=0:Pas_Temps:Temps_Final
+		for i=1:taille_matrice
+			for j=1:taille_matrice
+				Image[i,j]=abs(exp(- im*2*pi/lambda*t) * Matrice_Image_Spatial[i,j])
+			end
+		end
+		imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
+		#colorbar()
+		savefig("resMultProc_t$(t).png")
+		Nbr_Image=Nbr_Image+1
+	end
+
+end
 
 
 ##########CODE############
@@ -181,16 +204,14 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 #Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,Np], [3,3,1,Np],[1,4,1,Np], [3,1,1,Np], [3,4,1,Np]]
 #println(Np,"\n")
 
- 
-#println(Obstacle)
-
-println("Si vous voulez utilisé le parallelisme appuyez sur 'P',\n Sinon appuyez sur 'S' \n")
+println("Si vous voulez utiliser le parallelisme entrez 'P',\n Sinon entrez 'S'\n")
 P=readline()
-
 if(P=="P")
 	Parallel=true
-else
+elseif P=="S"
 	Parallel=false
+else
+	println("Erreur veuillez entrer 'S' ou 'P' \n")
 end
 
 if(Parallel)
@@ -225,7 +246,7 @@ if(Parallel)
 	println("\nTemps calcule Image: ")
 	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
 	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
-	@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
+	Image_Spatiale=@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
 else
 	Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
 	println("Temps calcule B: ")
@@ -258,7 +279,8 @@ else
 	println("\nTemps calcule Image: ")
 	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
 	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
-	@time Image_Mulit(Obstacle, Cm,Dm, NbrBoulles,beta)
-
-
+	Image_Spatiale=@time Image_Mulit(Obstacle, Cm,Dm, NbrBoulles,beta)
 end
+
+
+Gener_Sequence(Image_Spatiale,1,5)

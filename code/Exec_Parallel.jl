@@ -17,7 +17,7 @@ include("./initboules.jl")
 # Le macro @time permet d'afficher le temps (ainsi que d'autres info) d'execution de l'instruct devant laquelle il est placé.
 # Pour avoir un temps correct on lance 2 fois la fonct car la première fois, @time prend également en compte le temps de compilation. On ne regarde donc que le second temps donné
 
-# Pour lancer le code: julia distributexe.jl -p "nombre de processus"    Dans notre Cas on a prit 4 prcessus
+# Pour lancer le code: julia Exec_Parallel.jl -p "nombre de processus"    Dans notre Cas on a prit 4 prcessus
 # Pour lancer le code sur des machines distantes: julia distributexe.jl --machinefile hostfile.jl
 #######
 
@@ -59,7 +59,7 @@ end
 
 
 if TypInitBoule=="G"
-	NbrBoulles = 2
+	NbrBoulles = 100
 	(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace)
 end
 

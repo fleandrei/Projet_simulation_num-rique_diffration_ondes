@@ -19,7 +19,7 @@ taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-NbrBoulles = 2
+NbrBoulles = 100
 
 
 #####Function########	
@@ -63,16 +63,24 @@ Np = floor(Int64, k*1 + cbrt(1/(2*sqrt(2))*log(2*sqrt(2)*pi*k*e))^(2) * (k*1)^(1
 #Obstacle=[[0,0,1,Np], [4,4,0.01,Np], [2,3,1,Np], [1,2,1,Np], [2,2,1,Np], [1,1,1,Np], [3,3,1,Np],[1,4,1,Np], [3,1,1,Np], [3,4,1,Np]]
 #println(Np,"\n")
 
-(Obstacle, )=initBoulesGrid(NbrBoulles, taille_espace)
+#println("\nTemps pour initier la grille :\n")
+(Obstacle, )=@time initBoulesGrid(NbrBoulles, taille_espace)
+#(Obstacle, )=@time initBoulesGrid(NbrBoulles, taille_espace)
 
-Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
+#println("\nTemps pour Calcule de Dm :\n")
+Dm = @time Extraire_Dm(NbrBoulles, Obstacle, beta, k)
+#Dm = @time Extraire_Dm(NbrBoulles, Obstacle, beta, k)
+
 println("\nTemps pour Calcule de B :\n")
 B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
 B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
 println("\nTemps pour Calcule de A :\n")
 A  = @time Calcule_A(NbrBoulles, Obstacle, k)
 A  = @time Calcule_A(NbrBoulles, Obstacle, k)
-C  = Calcule_C(A,B)
+
+println("Temps Calcul de C")
+C  = @time Calcule_C(A,B)
+#C  = @time Calcule_C(A,B)
 
 
 # println(Dm)
@@ -82,7 +90,7 @@ C  = Calcule_C(A,B)
 
 println("\nTemps pour Calcule de Cm :\n")
 @time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
-@time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
+#@time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
 # println(Cm)
 
 
