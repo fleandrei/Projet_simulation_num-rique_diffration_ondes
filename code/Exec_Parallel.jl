@@ -32,7 +32,7 @@ Granular_A=2 # Granularité pour le calcul de la matrice *a
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
 h              = lambda/30  #pas de la grille
-taille_espace  = 20 # taille total de la grille
+taille_espace  =20 # taille total de la grille
 taille_matrice = floor(Int64, taille_espace*1/h) #convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
@@ -59,7 +59,7 @@ end
 
 
 if TypInitBoule=="G"
-	NbrBoulles = 100
+	NbrBoulles = 150
 	(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace)
 end
 

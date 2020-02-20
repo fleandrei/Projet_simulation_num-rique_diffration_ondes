@@ -14,12 +14,12 @@ include("./initboules.jl")
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
 h              = lambda/30  #pas de la grille
-taille_espace  = 20 # taille total de la grille
+taille_espace  = 23 # taille total de la grille
 taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-NbrBoulles = 100
+NbrBoulles = 500
 
 
 #####Function########	
@@ -80,7 +80,7 @@ A  = @time Calcule_A(NbrBoulles, Obstacle, k)
 
 println("Temps Calcul de C")
 C  = @time Calcule_C(A,B)
-#C  = @time Calcule_C(A,B)
+C  = @time Calcule_C(A,B)
 
 
 # println(Dm)
@@ -90,7 +90,7 @@ C  = @time Calcule_C(A,B)
 
 println("\nTemps pour Calcule de Cm :\n")
 @time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
-#@time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
+@time Cm = Extraire_Cm(C,NbrBoulles,Obstacle)
 # println(Cm)
 
 

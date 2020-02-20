@@ -420,15 +420,57 @@ function Calcule_Parallel_A(M, Obstacle, k, Granular::Int=0) #Calcule la matrice
 
     Cle=sort(collect(keys(Dico_Mat)))
 
-    A=Dico_Mat[Cle[1]]
-    for k = 2:length(Cle)
-    	A=vcat(A,Dico_Mat[Cle[k]])
-    end
+    #if M>400
+    #	Dico_Mat2=Dict()
+    #	charge=floor(Int64,length(Cle)/(np-1))
+    #	Surplus=length(Cle) - charge*(np-1)
+    #	@sync begin
+    #		for p = 2:np
+    #			if p != myid() || np == 1
+    #				@async begin
+   	#				if p==np
+    #						temp=remotecall(VCAT,p, Dico_Mat, Cle, (p-2)*charge+1, (p-1)*charge+Surplus )
+    #					else
+    #						temp=remotecall(VCAT,p, Dico_Mat, Cle, (p-2)*charge+1, (p-1)*charge )
+    #					end
+    #					Dico_Mat2[p-1]=fetch(temp)
+    #				end
+    #			end
+    #		end
+    #	end
+
+    #	Cle2=sort(collect(keys(Dico_Mat2)))
+    #	A=Dico_Mat2[Cle2[1]]
+
+    #	for k = 2:length(Cle2)
+    #		println(k)
+    #		A=vcat(A,Dico_Mat2[Cle2[k]])
+    #		println(size(A))
+
+    #	end
+    #else
+
+	    A=Dico_Mat[Cle[1]]
+	    for k = 2:length(Cle)
+	    	#println(k)
+	    	A=vcat(A,Dico_Mat[Cle[k]])
+	    	#println(size(A))
+
+	    end
+	#end
 
     return A
 end
 
 
+function VCAT(Dico_Mat, Cle, Indmin, IndMax)
+	Res=Dico_Mat[Cle[Indmin]]
+	for i=(Indmin+1):IndMax
+		Res=vcat(Res, Dico_Mat[Cle[i]])
+	end
+	return Res
+
+end
 
 
 function Calcule_C(A,b) #Calcule le vecteur c du système: "Ac=b".  Il s'agit du vecteur des coeff de Fourrier des ondes diffractées

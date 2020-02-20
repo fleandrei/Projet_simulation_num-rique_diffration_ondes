@@ -67,7 +67,16 @@ if TypInitBoule=="G"
 	println("Entrez le nombre de boulles: \n")
 
 	NbrBoulles = parse(Int, readline()) 
-	(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace)
+	if sqrt(NbrBoulles) > taille_espace #Si le nombre de boules est trop grand par rapport à la taille de l'espace, on augmente ce dernier
+
+		taille_espace=floor(Int64, sqrt(NbrBoulles))+1
+		print("Changement de la taille du côté du carré à :")
+		print(taille_espace)
+		print("\n \n")
+		taille_matrice = floor(Int64, taille_espace*1/h)
+	end
+
+	(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace) #Génération de la grille de disques
 end
 
 #####Function########
@@ -283,4 +292,4 @@ else
 end
 
 
-Gener_Sequence(Image_Spatiale,1,5)
+#Gener_Sequence(Image_Spatiale,1,5)
