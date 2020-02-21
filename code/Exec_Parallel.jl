@@ -59,7 +59,7 @@ end
 
 
 if TypInitBoule=="G"
-	NbrBoulles = 150
+	NbrBoulles = 400
 	(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace)
 end
 
