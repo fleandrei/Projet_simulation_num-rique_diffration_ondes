@@ -2,6 +2,10 @@ using Printf
 using PyPlot
 using SpecialFunctions
 using LinearAlgebra 
+using PyCall
+@pyimport matplotlib.animation as anim
+# using PyPlot
+using Plots
 
 include("./polar.jl")
 include("./diffraction.jl")

@@ -399,11 +399,11 @@ function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M,Beta)
 	Udiff = CalculeUq(Obstacle, x, y, k, Cm, M)
 	
 
-	Utot = abs( Uinc + Udiff )
+	Utot = Uinc + Udiff 
 	# Utot = real(Uinc)
 	# Utot = abs(Udiff)
 
-	return Utot
+	return Uinc, Udiff, Utot
 
 end
 
@@ -486,10 +486,13 @@ end
 
 
 #------------ Calcule et sauve image ------------
+
 function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 
 # declaration de la matrice
-	Image = zeros(Float64, taille_matrice, taille_matrice)
+	Image_inc  = zeros(Complex{Float64}, taille_matrice, taille_matrice)
+	Image_diff = zeros(Complex{Float64}, taille_matrice, taille_matrice)
+	Image_tot  = zeros(Complex{Float64}, taille_matrice, taille_matrice)
 	
 	# Parcoure et remplissage de la matrice
 	for i = 1:taille_matrice
@@ -501,23 +504,91 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 
 			if !Is_inDisk(x,y,Obstacle, M)
 
-				Image[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
+				Image_inc[i,j], Image_diff[i,j], Image_tot[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
 				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
 			end
 		end
-		println("Image [",i,"]","\n")
+		println("Images [",i,"]","\n")
+	end
+	
+
+	return Image_inc, Image_diff, Image_tot
+end
+
+
+
+
+
+
+
+
+function Image_save(obstacle,Cm,Dm, M,Beta)
+
+# declaration de la matrice
+	Image_inc2  = zeros(Float64, taille_matrice, taille_matrice)
+	Image_diff2 = zeros(Float64, taille_matrice, taille_matrice)
+	Image_tot2  = zeros(Float64, taille_matrice, taille_matrice)
+	
+
+	Image_inc, Image_diff, Image_tot = Image_Mulit(obstacle,Cm,Dm, M,Beta)
+	# Parcoure et remplissage de la matrice
+	for i = 1:taille_matrice
+
+		for j = 1:taille_matrice
+			Image_inc2[i,j]  = real(Image_inc[i,j])
+			Image_diff2[i,j] = abs(Image_diff[i,j])
+			Image_tot2[i,j]  = abs(Image_tot[i,j])
+		end
 	end
 	
 	# Affichage graphique
 
 	scale_min = - taille_espace/2
 	scale_max =   taille_espace/2
-	
+	# println(Image_tot2)
 	# imshow(transpose(Image), vmin=0.0, vmax=2.0, extent=(scale_min, scale_max, scale_min, scale_max))
-	imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
+	imshow(transpose(Image_inc2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("resMult.svg")
+	savefig("../results/resMult_inc.svg")
+	PyPlot.clf()
+	imshow(transpose(Image_diff2), extent=(scale_min, scale_max, scale_min, scale_max))
+	colorbar()
+	savefig("../results/resMult_diff.svg")
+	PyPlot.clf()
+	imshow(transpose(Image_tot2), extent=(scale_min, scale_max, scale_min, scale_max))
+	colorbar()
+	savefig("../results/resMult_tot.svg")
+
+	return Image_inc, Image_diff, Image_tot
 end
+
+
+
+
+
+     
+
+# function Video_Mult(obstacle,Cm,Dm, M,Beta,T) # ne pas utiliser
+# 	Sequence = []
+# 	println("tarace")
+# 	Image_inc, Image_diff, Image_tot = Image_Mulit(obstacle,Cm,Dm, M,Beta)
+# 	for t in 1:T
+# 		println(". - - -- -- - - - Sequence [",t,"]. -- - - - - - --  -","\n")
+		
+# 		for i = 1:taille_matrice
+
+# 			for j = 1:taille_matrice
+# 				Image_tot[i,j]  = real(exp(im*w*(t-1)*0.1)*Image_tot[i,j])
+# 			end
+# 		end
+# 		push!(Sequence,Image_tot)
+# 	end
+
+
+# 	return Sequence
+# end
+
+		
 
 
 
