@@ -654,7 +654,12 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 	# imshow(transpose(Image), vmin=0.0, vmax=2.0, extent=(scale_min, scale_max, scale_min, scale_max))
 	imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("resMult.svg")
+	resultname=pwd()
+	len=length(resultname)
+	resultname=resultname[1:len-5]
+	resultname=resultname*"/results/resultat_sequentiel_$(M)_disques"
+	savefig(resultname)
+	
 end
 
 

@@ -14,12 +14,12 @@ include("./initboules.jl")
 k              = 2*pi
 lambda         = 2*pi/k # longueur d'onde
 h              = lambda/30  #pas de la grille
-taille_espace  = 23 # taille total de la grille
+taille_espace  = 20 # taille total de la grille
 taille_matrice = convert(Int64, taille_espace*1/h)
 
 beta = pi #Angle de l'onde incidente
 e    = 10^(-12)
-NbrBoulles = 500
+NbrBoulles = 400
 
 
 #####Function########	

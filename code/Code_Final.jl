@@ -2,6 +2,7 @@ using Printf
 using PyPlot
 using Base.Threads
 using Distributed
+
 @everywhere using SpecialFunctions
 @everywhere using LinearAlgebra 
 
@@ -25,7 +26,7 @@ include("./initboules.jl")
 #import Polar
 
 
-addprocs(3) #On ajoute 3 ouvriers. Avec le processus courrant, cela fait 4 processus en tout. 
+addprocs(length(Sys.cpu_info()) - 1) #On ajoute 3 ouvriers. Avec le processus courrant, cela fait 4 processus en tout. 
 Granular_Image=9 # Granularité pour le calcul de l'image i.e. nombre de lignes qui vont être attribué aux processus qui va demander du travail
 Granular_A=2 # Granularité pour le calcul de la matrice *a 
 println("On a $(nprocs()) processus\n")
@@ -51,7 +52,7 @@ TypInitBoule=readline();
 
 if TypInitBoule=="A"
 	boules_min=5
-	boules_max=5
+	boules_max=10
 	xmin=-taille_espace/2
 	xmax=taille_espace/2
 	ymin=xmin
@@ -180,7 +181,11 @@ function Image_Multi_Proc(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Be
 	#imshow(transpose(Image), vmin=-2.5, vmax=2.5, extent=(-5, 5, -5, 5))
 	imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("resMultProc.svg")
+	resultname=pwd()
+	len=length(resultname)
+	resultname=resultname[1:len-5]
+	resultname=resultname*"/results/resultat_parallel_$(M)_disques"
+	savefig(resultname)
 	return Image
 end
 
@@ -234,7 +239,7 @@ if(Parallel)
 	@everywhere using LinearAlgebra
 	A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
 	#A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k)
-	println("Taille A=$(size(A)),  B=$(length(B)) \n")
+	#println("Taille A=$(size(A)), Taille B=$(length(B)) \n")
 	C  = Calcule_C(A,B)
 
 
@@ -267,7 +272,7 @@ else
 	@everywhere using LinearAlgebra
 	A  = @time Calcule_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
 	#A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k)
-	println("Taille A=$(size(A)),  B=$(length(B)) \n")
+	#println("Taille A=$(size(A)),  B=$(length(B)) \n")
 	C  = Calcule_C(A,B)
 
 
