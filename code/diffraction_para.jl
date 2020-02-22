@@ -39,11 +39,6 @@ function calculUinc_exact(x,y,Beta,k)
 end
 
 
-function calculRCS(U)
-	return 10 * log10(2*pi * abs(U)^2)
-end
-
-
 function CDH(bp,alphap,alpha,Np, k) #Calcule Cm: coef Fourrier onde réfléchie, Dm: Coef Fourrier onde incidente, Hm: vecteur hankelh1
 	Cm   = zeros(Complex{Float64}, 2*Np + 1, 1)
 	Dm   = zeros(Complex{Float64}, 2*Np + 1, 1)
@@ -610,20 +605,20 @@ function Image_save(obstacle,Cm,Dm, M,Beta)
 
 	imshow(transpose(Image_inc2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("../results/resMult_inc.svg")
-	println("----- incindent saved in '../results/resMult_inc.svg' -----:\n")
+	savefig("../results/resMult_inc.png")
+	println("----- incindent saved in '../results/resMult_inc.png' -----:\n")
 	PyPlot.clf()
 
 	imshow(transpose(Image_diff2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("../results/resMult_diff.svg")
-	println("----- diffraction saved in '../results/resMult_diff.svg' -----:\n")
+	savefig("../results/resMult_diff.png")
+	println("----- diffraction saved in '../results/resMult_diff.png' -----:\n")
 	PyPlot.clf()
 
 	imshow(transpose(Image_tot2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("../results/resMult_tot.svg")
-	println("----- total saved in '../results/resMult_tot.svg' -----:\n")
+	savefig("../results/resMult_tot.png")
+	println("----- total saved in '../results/resMult_tot.png' -----:\n")
 
 	return Image_inc, Image_diff, Image_tot
 end
@@ -732,42 +727,66 @@ function save_image_para(Image)
 	
 	imshow(transpose(Image), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
-	savefig("../results/para_resMult_tot.svg")
-	println("\n----- total saved in '../results/para_resMult_tot.svg' -----:\n")
+	savefig("../results/para_resMult_tot.png")
+	println("\n----- total saved in '../results/para_resMult_tot.png' -----:\n")
 	PyPlot.clf()
 
 end
 
 
+function champ_lointain(theta, Cm, Obstacle,M)
 
-function RCS(Obstacle, numdisque, Cm, R, Beta, k)
-	if numdisque>length(Obstacle)
-		println("Erreur le numéro de disque que vous avez entré est trop grand: max=$(length(Obstacle))")
-		return 1
-	else
 
-		x=Obstacle[numdisque][1]
-		y=Obstacle[numdisque][2]
-		origin=beta - pi
-		Ysource, Xsource= conversion_cart(R, origin)
-		Ei=calculUinc_exact(Xsource,Ysource,Beta,k)
-		Deg=zeros(361)
-		RCS=zeros(361)
+	sum_disk = 0
+	for p in 1:M
 
-		for i=0:360
-			Deg[i+1]=i
-			Es=calculUp(R, (origin+Deg2Rad(i))%(2*pi), Cm[numdisque][1], Obstacle[numdisque][4], k)
-			println(abs(Es))
-			println(real(Ei))
-			RCS[i+1]=4*pi*R*abs(Es)*abs(Es)/(real(Ei)*real(Ei))
+		Np = Obstacle[p][4]
+		x  = Obstacle[p][1]
+		y  = Obstacle[p][2]
+
+		Cp = Cm[p][1]
+
+		b, alpha = conversion_polaire(x, y)
+
+
+		sum_Cn = 0
+		for n in -Np:Np
+			index = n + Np+1
+
+			sum_Cn += exp( im*n*(theta - pi/2) ) * Cp[index]
 		end
 
-		plot(Deg,RCS)
-		show()
-		PyPlot.clf()
-		return 0
+		sum_disk += exp(-im*b*k* cos(theta - alpha)) * sum_Cn
 	end
+
+
+	res = exp(-im * pi/4) * sqrt(2/(k*pi)) * sum_disk
+
+	return res
 end
 
+
+function calculRCS(theta, Cm, Obstacle,M)
+	F = champ_lointain(theta, Cm, Obstacle,M)
+	return 10 * log10(2*pi * abs(F)^2)
+end
+
+
+function plot_RCS(Cm, Obstacle,M)
+	Deg=zeros(361)
+	RCS=zeros(361)
+
+	for i=0:360
+		theta = Deg2Rad(i)
+
+		Deg[i+1] = i
+		RCS[i+1] = calculRCS(theta, Cm, Obstacle,M)
+	end
+
+	plot(Deg,RCS)
+	savefig("../results/RCS.png")
+	println("\n----- total saved in '../results/RCS.png' -----:\n")
+	PyPlot.clf()
+end
 
 

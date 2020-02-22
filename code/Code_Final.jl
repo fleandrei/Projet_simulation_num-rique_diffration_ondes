@@ -65,15 +65,17 @@ TypInitBoule=readline();
 #-------------------------
 # -- Random disposition --
 #-------------------------
-if TypInitBoule=="A"
-	boules_min=5
-	boules_max=10
-	xmin=-taille_espace/2
-	xmax=taille_espace/2
-	ymin=xmin
-	ymax=xmax
-	rmin=0.1
-	rmax=1.5
+if (TypInitBoule == "A" || TypInitBoule == "a")
+	boules_min = 5
+	boules_max = 10
+
+	xmin = -taille_espace/2
+	xmax =  taille_espace/2
+	ymin = xmin
+	ymax = xmax
+	rmin = 0.1
+	rmax = 1.5
+
 	Obstacle,NbrBoulles = initBoulesAlea(boules_min,boules_max,xmin,xmax,ymin,ymax,rmin,rmax)
 	println("Nombre de disques: $NbrBoulles")
 end
@@ -81,20 +83,22 @@ end
 #-------------------------
 # -- grid structure --
 #-------------------------
-if TypInitBoule=="G"
+if (TypInitBoule == "G" || TypInitBoule == "g")
 	println("Entrez le nombre de disques: \n")
 
 	NbrBoulles = parse(Int, readline()) 
 	if sqrt(NbrBoulles) > taille_espace #Si le nombre de boules est trop grand par rapport à la taille de l'espace, on augmente ce dernier
 
-		taille_espace=floor(Int64, sqrt(NbrBoulles))+1
+		taille_espace = floor(Int64, sqrt(NbrBoulles))+1
+
 		print("Changement de la taille du côté du carré à :")
 		print(taille_espace)
 		print("\n \n")
+
 		taille_matrice = floor(Int64, taille_espace*1/h)
 	end
 
-	(Obstacle, )= initBoulesGrid(NbrBoulles, taille_espace) #Génération de la grille de disques
+	(Obstacle, ) = initBoulesGrid(NbrBoulles, taille_espace) #Génération de la grille de disques
 end
 
 
@@ -113,10 +117,12 @@ end
 ####### Calculs de la solution ########
 println("Si vous voulez utiliser le parallelisme entrez 'P',\nSinon entrez 'S'\n")
 P=readline()
-if(P=="P")
-	Parallel=true
-elseif P=="S"
-	Parallel=false
+if(P == "P" || P == "p")
+	Parallel = true
+
+elseif (P == "S" || P == "s")
+	Parallel = false
+
 else
 	println("Erreur veuillez entrer 'S' ou 'P' \n")
 end
@@ -134,6 +140,7 @@ if(Parallel)
 	@everywhere include("./diffraction_para.jl")
 	@everywhere using SpecialFunctions
 	@everywhere using LinearAlgebra
+	
 	A  = @time Calcule_Parallel_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
 
 	println("\n------- Solving the system -------")
@@ -171,6 +178,7 @@ else
 	@everywhere include("./diffraction_para.jl")
 	@everywhere using SpecialFunctions
 	@everywhere using LinearAlgebra
+
 	A  = @time Calcule_A(NbrBoulles, Obstacle, k) #Ici on n'a pas donné la Granularité (param facultatif) : Elle sera définie par la fonction
 
 	println("\n------- Solving the system -------")
@@ -193,4 +201,10 @@ else
 	@time Image_Mulit(Obstacle, Cm,Dm, NbrBoulles,beta)
 end
 
-RCS(Obstacle, 1, Cm, 30, beta, k)
+plot_RCS(Cm, Obstacle, NbrBoulles)
+
+
+
+
+
+
