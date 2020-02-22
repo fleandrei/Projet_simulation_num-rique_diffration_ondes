@@ -22,7 +22,12 @@ I) Ce projet contient:
 II) Lancer le programme:
 
     L'exécutable s'appelle "run.jl" et se trouve dans le dossier global du projet.
-    Lancez le en ligne de commande avec julia et laissez vous guider par les instructions qui apparaissent dans le terminal. Il vous sera demandé si vous voulez faire apparaitre les disques de manière
+    Lancez le en ligne de commande avec julia et laissez vous guider par les instructions qui apparaissent dans le terminal.
+    (Assurez vous que "julia" est bien la commande lancant julia, sinon il faut utiliser la commande qui lance julia)
+    
+   julia run.jl
+    
+    Il vous sera demandé si vous voulez faire apparaitre les disques de manière
     aléatoire (le nombre, la taille et la position des disques est aléatoire), ou de manière ordonnée en grille. Vous aurez alors la possibilité de choisir le nombre de disques, qui auront alors tous
     la même taille et seront placés les uns à coté des autres.
     On vous demandera également si vous voulez utiliser le parallèlisme ou non. Si vous choisissez de l'utiliser, alors le programme utilisera tous les coeurs disponible sur le PC.
