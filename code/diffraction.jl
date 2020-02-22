@@ -550,14 +550,17 @@ function Image_save(obstacle,Cm,Dm, M,Beta)
 	imshow(transpose(Image_inc2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("../results/resMult_inc.svg")
+	println("----- incindent saved in '../results/resMult_inc.svg' -----:\n")
 	PyPlot.clf()
 	imshow(transpose(Image_diff2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("../results/resMult_diff.svg")
+	println("----- diffraction saved in '../results/resMult_diff.svg' -----:\n")
 	PyPlot.clf()
 	imshow(transpose(Image_tot2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("../results/resMult_tot.svg")
+	println("----- total saved in '../results/resMult_tot.svg' -----:\n")
 
 	return Image_inc, Image_diff, Image_tot
 end
