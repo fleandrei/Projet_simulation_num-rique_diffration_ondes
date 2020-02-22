@@ -170,7 +170,6 @@ else
 	println("----------- Construction du Probleme -------------\n")
 	println("--------------------------------------------------\n")
 
-	vv
 	Dm = Extraire_Dm(NbrBoulles, Obstacle, beta, k)
 	println("Temps calcule B: ")
 	B  = @time Calcule_B(NbrBoulles ,Obstacle, beta,k,Dm)
