@@ -646,7 +646,7 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
 			end
 		end
-		println("Images [",i,"]","\n")
+		#println("Images [",i,"]","\n")
 	end
 	
 

@@ -52,4 +52,12 @@ end
 
 #end
 
+function Rad2Deg(Rad)
+	return Rad*360/(2*pi)
+end
+
+function  Deg2Rad(Deg)
+	return Deg*2*pi/360
+end
+
 push!(LOAD_PATH, pwd())

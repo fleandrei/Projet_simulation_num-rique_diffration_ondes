@@ -269,7 +269,19 @@ function RCS(Obstacle, numdisque, Cm, R, Beta, k)
 		origin=beta - pi
 		Ysource, Xsource= conversion_cart(R, origin)
 		Ei=calculUinc_exact(Xsource,Ysource,Beta,k)
+		Deg=zeros(361)
+		RCS=zeros(361)
 
+		for i=0:360
+			Deg[i+1]=i
+			Es=calculUp(R, (origin+Deg2Rad(i))%(2*pi), Cm[numdisque][1], Obstacle[numdisque][4], k)
+			println(abs(Es))
+			println(real(Ei))
+			RCS[i+1]=4*pi*R*abs(Es)*abs(Es)/(real(Ei)*real(Ei))
+		end
+
+		plot(Deg,RCS)
+		show()
 	end
 
 end
@@ -370,7 +382,9 @@ else
 	#@time Image_Multi_Proc(Obstacle, taille_matrice, taille_espace, Cm,Dm, k, NbrBoulles,beta, h, Granular_Image)
 	#@timev Image_Multi_Proc(Obstacle,Cm,Dm,NbrBoulles,beta)
 	@time Image_Mulit(Obstacle, Cm,Dm, NbrBoulles,beta)
+	
 end
-
+	
+RCS(Obstacle, 1, Cm, 30, beta, k)
 
 #Gener_Sequence(Image_Spatiale,1,5)
