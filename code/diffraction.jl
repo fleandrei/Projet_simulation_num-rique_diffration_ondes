@@ -12,13 +12,6 @@ function calculUp(r,teta, Cm, Np)
 		U   = U + (Cm[idx] * Phi(m,r, teta,k))
 	end	
 
-
-
-	# ordre = -14
- #    U   =  Cm[ordre+Np+1] * Phi(ordre,r, teta,k)
- #    if(real(U) > 2)
- #    	println("U = ",U,"Ordre ",ordre," : c=", Cm[ordre+Np+1],"; phi = ",Phi(ordre,r, teta,k), "\n")
- #    end
 	return U
 end
 
@@ -85,21 +78,6 @@ function CoeFourrier_OndeInc(bp,alphap,alpha,Np, k) #cas 1d
 end
 
 
-# function hankelh1Vector(Np,a,k) #cas 1d #inutile
-
-# 	Hm   = zeros(Complex{Float64},2*Np+1,1)
-# 	temp = a * k
-
-# 	for m = -Np:Np
-
-# 		idx     = m + Np + 1
-# 		Hm[idx] = hankelh1(m, temp)
-# 	end
-
-# 	return Hm
-# end
-
-
 function Calcule_b(bp,alphap,alpha,Np, k, a) #cas 1d
 
 	Dm   = CoeFourrier_OndeInc(bp, alphap, alpha, Np, k)
@@ -121,9 +99,8 @@ function CoeFourrier_OndeDiffracte(bp,alphap,alpha,Np, k, a) # cas 1d
 
 	Cm = zeros(Complex{Float64},2*Np+1,1)
 	b  = Calcule_b(bp, alphap, alpha, Np, k, a)
-	# Hm = hankelh1Vector(Np, a, k)
 	A  = Matrix(I, 2*Np+1, 2*Np+1)
-	# A  = A.*Hm
+
 	Cm = A\b
 
 	println("----- A -----:\n")
@@ -140,7 +117,6 @@ end
 
 
 function Phi(m,rp, teta,k)
-	# println("Ordre ",m," : Hankel=", hankelh1(m, k*rp),"; exp = ",exp(im*m*teta), "\n")
 	return hankelh1(m, k*rp)*exp(im*m*teta)
 end
 
@@ -160,8 +136,7 @@ function dmp(p, Obstacle, Beta,k) # Calcule les coeff Fourrier de l'onde inciden
 	
 	Np      = Obstacle[p][4]
 	Np      = floor(Int, Np) #convert to int
-	# println(p)
-	# println(Np)
+
 	Dm      = zeros(Complex{Float64}, 2*Np +1, 1)
 	bp,teta = conversion_polaire(Obstacle[p][1], Obstacle[p][2])
 	temp    = exp(im*k * cos(Beta-teta) * bp)
@@ -234,7 +209,6 @@ end
 function Matrix_D(Np,k,ap)
 	D = zeros(Complex{Float64}, 2*Np +1, 2*Np +1)
 
-	#N = min(Np,Nq)
 	for m = 1:2*Np+1
 		D[m,m] = besselj(m-(Np+1),ap*k)/hankelh1(m-(Np+1), ap*k)
 	end
@@ -255,7 +229,6 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 
 	if p == q
 		A = 1*Matrix(I,2*Np+1,2*Np+1)
-		#println(A,"\n")
 		return A
 		
 	else
@@ -284,7 +257,6 @@ function Apq(p,q,k, Obstacle) #Calcule la sous-matrice d'indices p,q de la matri
 		S = Matrix_S(Np,Nq,b,teta,k)
 
 		println("----------\n")
-		#  println(D)
 		println(size(transpose(S)),"\n")
 		println("----------\n")
 
@@ -303,16 +275,13 @@ end
 
 function Calcule_A(M, Obstacle, k) #Calcule la matrice A du système "Ac=b"
 	
-	
 	A=Apq(1,1,k, Obstacle) #Correspond à la première boucle de for j=1
-	
 
 	for j = 2:M
 
 		A=hcat(A, Apq(1,j,k, Obstacle))
 	end
 	
-	#println("\n")
 
 	for i = 2:M
 
@@ -322,14 +291,12 @@ function Calcule_A(M, Obstacle, k) #Calcule la matrice A du système "Ac=b"
 			Al=hcat(Al, Apq(i,j,k, Obstacle))
 			
 		end
-		#println(Al)
-		#println("\n")
+
 		A=vcat(A,Al)
 		println("----------\n")
 		println(size(A))
 		println("----------\n") 
 	end
-	#println(A,"\n")
 
 	return A
 end
@@ -342,9 +309,10 @@ end
 
 
 function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système 
+
 	Cm=[[] for i=1:M]
-	# Crev = reverse(C,dims=2)
 	curseur=0
+
 	for i=1:M
 		
 		Np=Obstacle[i][4]
@@ -355,7 +323,6 @@ function Extraire_Cm(C,M,Obstacle) #A partir du vecteur C du système
 		curseur=curseur+2*Np+1
 		
 	end
-	# println(Cm)
 
 	return Cm
 
@@ -367,7 +334,6 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 	somme_q = 0
 
 	for q = 1:M
-		#somme_n=0
 
 		Nq = Obstacle[q][4]
 		Nq = floor(Int, Nq)
@@ -381,7 +347,6 @@ function CalculeUq(Obstacle, x,y, k,Cm,M)
 		b  = distance(x1,y1,x2,y2)
 		angle_2ppq = angle_2p(x1,y1,x2,y2)
 		Cq = Cm[q][1]
-		#println(Cq,"\n")
 
 		somme_q = somme_q + calculUp(b, angle_2ppq, Cq, Nq)
 	end
@@ -398,10 +363,7 @@ function Calcule_Utot_MultiDisk(Obstacle,x,y,Cm,Dm,k,M,Beta)
 
 	Udiff = CalculeUq(Obstacle, x, y, k, Cm, M)
 	
-
 	Utot = Uinc + Udiff 
-	# Utot = real(Uinc)
-	# Utot = abs(Udiff)
 
 	return Uinc, Udiff, Utot
 
@@ -437,19 +399,9 @@ end
 
 # --------- genere boule aleatoirement----------
 function initBoulesAlea(nb_boules_min,nb_boules_max,xmin,xmax,ymin,ymax,rmin,rmax) # Crée des boulles dont le nombre, la position et le rayon sont aléatoires
-	# nb_boules_min = 2
-	# nb_boules_max = 20
+
 	nb_boules = rand(nb_boules_min:nb_boules_max)
 	boules = [[] for p=1:nb_boules]
-
-	# breaking = 0
-
-	# xmin = 0
-	# xmax = 10
-	# ymin = 0
-	# ymax = 10
-	# rmin = 0.5
-	# rmax = 3
 
 	i = 0
 	iter = 0
@@ -478,7 +430,6 @@ function initBoulesAlea(nb_boules_min,nb_boules_max,xmin,xmax,ymin,ymax,rmin,rma
 		iter += 1 
 	end
 
-	#println(boules)
 	return (boules, nb_boules)
 end
 
@@ -505,7 +456,7 @@ function Image_Mulit(obstacle,Cm,Dm, M,Beta)
 			if !Is_inDisk(x,y,Obstacle, M)
 
 				Image_inc[i,j], Image_diff[i,j], Image_tot[i,j] = Calcule_Utot_MultiDisk(Obstacle, x, y, Cm, Dm, k, M,Beta)
-				#println("Image [",i,",",j,"] = ", Image[i,j],"\n")
+
 			end
 		end
 		println("Images [",i,"]","\n")
@@ -545,18 +496,19 @@ function Image_save(obstacle,Cm,Dm, M,Beta)
 
 	scale_min = - taille_espace/2
 	scale_max =   taille_espace/2
-	# println(Image_tot2)
-	# imshow(transpose(Image), vmin=0.0, vmax=2.0, extent=(scale_min, scale_max, scale_min, scale_max))
+
 	imshow(transpose(Image_inc2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("../results/resMult_inc.svg")
 	println("----- incindent saved in '../results/resMult_inc.svg' -----:\n")
 	PyPlot.clf()
+
 	imshow(transpose(Image_diff2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("../results/resMult_diff.svg")
 	println("----- diffraction saved in '../results/resMult_diff.svg' -----:\n")
 	PyPlot.clf()
+
 	imshow(transpose(Image_tot2), extent=(scale_min, scale_max, scale_min, scale_max))
 	colorbar()
 	savefig("../results/resMult_tot.svg")
@@ -568,30 +520,6 @@ end
 
 
 
-
-     
-
-# function Video_Mult(obstacle,Cm,Dm, M,Beta,T) # ne pas utiliser
-# 	Sequence = []
-# 	println("tarace")
-# 	Image_inc, Image_diff, Image_tot = Image_Mulit(obstacle,Cm,Dm, M,Beta)
-# 	for t in 1:T
-# 		println(". - - -- -- - - - Sequence [",t,"]. -- - - - - - --  -","\n")
-		
-# 		for i = 1:taille_matrice
-
-# 			for j = 1:taille_matrice
-# 				Image_tot[i,j]  = real(exp(im*w*(t-1)*0.1)*Image_tot[i,j])
-# 			end
-# 		end
-# 		push!(Sequence,Image_tot)
-# 	end
-
-
-# 	return Sequence
-# end
-
-		
 
 
 
