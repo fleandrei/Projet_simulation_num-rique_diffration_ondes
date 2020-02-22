@@ -194,6 +194,7 @@ function Image_Multi_Proc(obstacle, taille_matrice, taille_espace,Cm,Dm, k, M,Be
 	return Image_inc, Image_diff, Image_tot
 end
 
+
 function Image_save_para(Image_inc, Image_diff, Image_tot)
 
 # declaration de la matrice
@@ -253,6 +254,22 @@ function Gener_Sequence(Matrice_Image_Spatial,Pas_Temps, Temps_Final)
 		#colorbar()
 		savefig("resMultProc_t$(t).png")
 		Nbr_Image=Nbr_Image+1
+	end
+
+end
+
+
+function RCS(Obstacle, numdisque, Cm, R, Beta, k)
+	if numdisque>length(Obstacle)
+		println("Erreur le numéro de disque que vous avez entré est trop grand: max=$(length(Obstacle))")
+	else
+
+		x=Obstacle[numdisque][1]
+		y=Obstacle[numdisque][2]
+		origin=beta - pi
+		Ysource, Xsource= conversion_cart(R, origin)
+		Ei=calculUinc_exact(Xsource,Ysource,Beta,k)
+
 	end
 
 end
